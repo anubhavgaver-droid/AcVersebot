@@ -1,6 +1,6 @@
 import os
 import asyncio
-from pyrogram import Client
+from pyrogram import Client, idle
 from flask import Flask, send_from_directory, jsonify, request
 from threading import Thread
 import config
@@ -133,7 +133,6 @@ def submit_payment():
 
     return jsonify({"success": True, "message": "Payment sent for Admin verification!"})
 
-# Pyrogram Bot Client Initialize
 app = Client(
     "ACVerse_Bot",
     api_id=config.API_ID,
@@ -144,25 +143,19 @@ app = Client(
 
 web_app.config["BOT_CLIENT"] = app
 
-def run_bot():
+def start_bot():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     app.start()
+    print("🤖 Bot Started Successfully!")
+    idle()
+    app.stop()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     
-    # Pyrogram Bot को थ्रेड में सही Event Loop के साथ स्टार्ट करें
-    Thread(target=run_bot, daemon=True).start()
+    # Bot Start in Async Thread
+    Thread(target=start_bot, daemon=True).start()
     
     print(f"🚀 ACVerse Server Running on Port {port}!")
-    
-    # Render Web Service के लिए Flask रन करें
     web_app.run(host="0.0.0.0", port=port)
-
-def run_bot():
-    try:
-        app.start()
-        print("✅ Bot connected successfully!") # यह लॉग्स में दिखना चाहिए
-    except Exception as e:
-        print(f"❌ Bot failed to start: {e}") # अगर एरर है तो यहाँ दिखेगा
