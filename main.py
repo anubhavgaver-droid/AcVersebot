@@ -1,4 +1,4 @@
-import os
+import os  # 'Import' को स्मॉल अक्षर 'import' किया गया
 from pyrogram import Client
 from flask import Flask, send_from_directory, jsonify, request
 from threading import Thread
@@ -132,9 +132,7 @@ def submit_payment():
 
     return jsonify({"success": True, "message": "Payment sent for Admin verification!"})
 
-def run_flask():
-    web_app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
-
+# Pyrogram Bot Client Initialize
 app = Client(
     "ACVerse_Bot",
     api_id=config.API_ID,
@@ -145,7 +143,17 @@ app = Client(
 
 web_app.config["BOT_CLIENT"] = app
 
+def start_bot():
+    app.start()
+
 if __name__ == "__main__":
-    Thread(target=run_flask, daemon=True).start()
-    print("🚀 ACVerse Server Running!")
-    app.run()
+    # Render और लोकल दोनों जगह सपोर्ट करने के लिए पोर्ट बाइंडिंग
+    port = int(os.environ.get("PORT", 8080))
+    
+    # Pyrogram Bot को बैकग्राउंड थ्रेड में चलाएँ
+    Thread(target=start_bot, daemon=True).start()
+    
+    print(f"🚀 ACVerse Server Running on Port {port}!")
+    
+    # Render / Production Flask Server
+    web_app.run(host="0.0.0.0", port=port)
