@@ -25,23 +25,19 @@ function haptic(type = "light") {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // User Profile Information
     const userNameEl = document.getElementById("userName");
     const userIdEl = document.getElementById("userId");
     if (userNameEl) userNameEl.innerText = userName;
     if (userIdEl) userIdEl.innerText = `ID: ${userId}`;
 
-    // Config Fetching
     fetch('/api/config')
         .then(res => res.json())
         .then(cfg => { if (cfg && cfg.upi_id) upiConfig = cfg; })
         .catch(err => console.log("Config fetch bypass"));
 
-    // Router and Splash handling
     startAppRouter();
 });
 
-// Router Logic for Animations
 function startAppRouter() {
     const params = new URLSearchParams(window.location.search);
     const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
@@ -53,7 +49,6 @@ function startAppRouter() {
     }
 }
 
-// 1. Welcome Splash Screen Animation
 function runNormalWelcomeSplash() {
     const splash = document.getElementById('app-splash-loader');
     if (splash) splash.classList.remove('hidden');
@@ -61,11 +56,10 @@ function runNormalWelcomeSplash() {
     loadInitialData().then(() => {
         setTimeout(() => {
             if (splash) splash.classList.add('hidden');
-        }, 2000);
+        }, 1500);
     });
 }
 
-// 2. Direct Story Link Animation (0-100% Loader)
 function runDirectLinkAnimation(storyId) {
     const loader = document.getElementById('direct-loader');
     const progressVal = document.getElementById('progress-val');
@@ -91,7 +85,6 @@ function runDirectLinkAnimation(storyId) {
     }, 50);
 }
 
-// API Data Fetching
 function loadInitialData() {
     return fetch(`/api/user_info?user_id=${userId}`)
         .then(res => res.json())
@@ -127,7 +120,6 @@ function loadInitialData() {
         .catch(err => console.error("Data Loading Failed:", err));
 }
 
-// Render Stories to Grid
 function renderStories(stories, targetGridId = 'storiesGrid') {
     const grid = document.getElementById(targetGridId);
     if (!grid) return;
@@ -157,7 +149,6 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
     }).join('');
 }
 
-// Unlocked Orders Tab
 function renderUnlockedLibrary() {
     const unlockedList = document.getElementById("unlockedList");
     if (!unlockedList) return;
@@ -182,7 +173,7 @@ function renderUnlockedLibrary() {
     `).join('');
 }
 
-// Story Details Modal View
+// 🎯 FIXED OPEN MODAL FUNCTION
 function openModal(storyId) {
     haptic('medium');
 
@@ -201,7 +192,7 @@ function openModal(storyId) {
                     </div>
                     <div class="story-meta">
                         <span class="platform-badge">${badgeText}</span>
-                        <h2 style="margin: 6px 0;">${story.title}</h2>
+                        <h2 style="margin: 6px 0; font-size: 18px;">${story.title}</h2>
                         <div style="background: rgba(0, 255, 127, 0.1); border: 2px solid #00ff7f; padding: 12px; border-radius: 10px; text-align: center; margin: 10px 0;">
                             <h4 style="color: #00ff7f; margin-bottom: 4px;">🟢 STORY UNLOCKED</h4>
                             <p style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Clicking below will launch the bot to get files.</p>
@@ -220,22 +211,25 @@ function openModal(storyId) {
                     </div>
                     <div class="story-meta">
                         <span class="platform-badge">${badgeText}</span>
-                        <h2 style="margin: 6px 0;">${story.title}</h2>
+                        <h2 style="margin: 6px 0; font-size: 18px;">${story.title}</h2>
                         <div class="genre-tag">${story.genre || 'Audio Series'}</div>
                         <p class="desc-box">${story.description || 'No description available.'}</p>
                     </div>
                     <div class="buy-footer">
                         <div>
                             <span style="font-size:10px; color:#777;">TOTAL PRICE</span>
-                            <div style="font-size:18px; font-weight:900;">₹${story.price}</div>
+                            <div style="font-size:18px; font-weight:900; color:var(--text);">₹${story.price}</div>
                         </div>
-                        <button class="btn-buy" onclick="openPaymentModal()">BUY & UNLOCK</button>
+                        <button class="btn-buy" style="width: auto; padding: 10px 20px;" onclick="openPaymentModal()">BUY & UNLOCK</button>
                     </div>
                 `;
             }
 
             const modal = document.getElementById("storyModal");
-            if (modal) modal.classList.remove("hidden");
+            if (modal) {
+                modal.classList.remove("hidden");
+                document.body.style.overflow = "hidden"; // Disable background scrolling
+            }
         })
         .catch(err => {
             if (tg) tg.showAlert("Error loading story details!");
@@ -246,9 +240,9 @@ function closeModal() {
     haptic('light');
     const modal = document.getElementById("storyModal");
     if (modal) modal.classList.add("hidden");
+    document.body.style.overflow = "auto"; // Enable background scrolling
 }
 
-// Payment Modal Popups
 function openPaymentModal() {
     haptic('medium');
     closeModal();
@@ -264,13 +258,17 @@ function openPaymentModal() {
         paymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiConfig.upi_id}%26pn=ACVerse%26am=${currentStory.price}`;
     }
 
-    if (payModal) payModal.classList.remove('hidden');
+    if (payModal) {
+        payModal.classList.remove('hidden');
+        document.body.style.overflow = "hidden";
+    }
 }
 
 function closePaymentModal() {
     haptic('light');
     const payModal = document.getElementById('paymentModal');
     if (payModal) payModal.classList.add('hidden');
+    document.body.style.overflow = "auto";
 }
 
 function copyUpi() {
@@ -279,7 +277,6 @@ function copyUpi() {
     if (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
 }
 
-// UTR Submission
 function submitTransaction() {
     const utrInput = document.getElementById("utrInput");
     const utr = utrInput ? utrInput.value.trim() : "";
@@ -374,11 +371,9 @@ function toggleWishlist(storyId, evt) {
     });
 }
 
-// Navigation Tabs
 function switchTab(tabName, btn) {
     haptic('selection');
 
-    // Auto close any active modals
     closeModal();
     closePaymentModal();
 
@@ -396,7 +391,6 @@ function switchTab(tabName, btn) {
     }
 }
 
-// Filters
 function filterCat(cat, evt) {
     haptic('light');
     document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
