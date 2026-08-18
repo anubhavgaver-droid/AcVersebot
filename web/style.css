@@ -53,8 +53,12 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     padding: 15px;
-    padding-bottom: 40px;
+    padding-bottom: 80px; /* Adjusted for Bottom Navigation */
     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.hidden {
+    display: none !important;
 }
 
 /* 3. Top Header Bar */
@@ -144,6 +148,8 @@ body {
 .tags-group {
     display: flex;
     gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
 }
 
 .tag {
@@ -155,6 +161,7 @@ body {
     font-size: 12px;
     font-weight: 800;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .tag.active {
@@ -199,7 +206,7 @@ body {
     z-index: 2;
 }
 
-.story-card img {
+.story-card img.poster-img {
     width: 100%;
     height: 160px;
     object-fit: cover;
@@ -213,7 +220,7 @@ body {
     flex-grow: 1;
 }
 
-.badge-blue {
+.platform-badge, .badge-blue {
     background: var(--badge-blue);
     color: #fff;
     font-size: 9px;
@@ -225,7 +232,7 @@ body {
     text-transform: uppercase;
 }
 
-.card-title {
+.story-title, .card-title {
     font-size: 13px;
     font-weight: 800;
     line-height: 1.2;
@@ -236,13 +243,13 @@ body {
     overflow: hidden;
 }
 
-.price-tag {
+.story-price, .price-tag {
     font-size: 16px;
     font-weight: 900;
     margin-bottom: 10px;
 }
 
-.view-btn, .buy-btn {
+.view-btn, .buy-btn, .btn-buy {
     width: 100%;
     background: var(--accent);
     color: #000;
@@ -257,12 +264,12 @@ body {
     margin-top: auto;
 }
 
-.view-btn:active, .buy-btn:active {
+.view-btn:active, .buy-btn:active, .btn-buy:active {
     transform: translate(2px, 2px);
     box-shadow: none;
 }
 
-/* 7. User Profile Section (Exact Video Design) */
+/* 7. User Profile Section */
 .user-card {
     background: var(--card-bg);
     border: 3px solid var(--border);
@@ -361,6 +368,11 @@ body {
     cursor: pointer;
 }
 
+.theme-btn.active-theme {
+    background: var(--accent);
+    color: #000;
+}
+
 .quick-btn {
     width: 100%;
     background: var(--card-bg);
@@ -374,9 +386,8 @@ body {
     cursor: pointer;
 }
 
-/* 9. Modal Overlay */
+/* 9. Modal Overlay & Blurred Hero Backdrop */
 .modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -384,6 +395,7 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.75);
     z-index: 100;
+    display: flex;
     justify-content: center;
     align-items: flex-end;
 }
@@ -415,20 +427,187 @@ body {
     right: 15px;
     background: #000;
     color: #fff;
-    border: none;
+    border: 2px solid var(--border);
     width: 28px;
     height: 28px;
     border-radius: 50%;
     font-size: 14px;
     font-weight: 900;
     cursor: pointer;
+    z-index: 10;
+}
+
+/* Hero Blurred Backdrop in Story Modal */
+.hero-backdrop {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--border);
+    margin-bottom: 12px;
+}
+
+.hero-backdrop .bg-blur {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(12px) brightness(0.6);
+    transform: scale(1.1);
+}
+
+.hero-backdrop .poster-corner {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    width: 100px;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #fff;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+}
+
+.story-meta {
+    padding-top: 5px;
+}
+
+.genre-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
 }
 
 .desc-box {
     border: 2px solid var(--border);
     border-radius: 8px;
     padding: 10px;
-    font-size: 13px;
+    font-size: 12px;
     margin-top: 10px;
     line-height: 1.4;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.buy-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 2px dashed var(--border);
+}
+
+/* 10. Bottom Navigation Bar */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--card-bg);
+    border-top: 3px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0;
+    z-index: 90;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.nav-btn.active {
+    opacity: 1;
+    color: var(--accent);
+}
+
+.nav-btn span {
+    font-size: 18px;
+}
+
+/* 11. Splash & Loader Animations */
+.splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.loader-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.progress-container {
+    width: 80%;
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    height: 16px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+/* 12. UPI Payment Popup Modal */
+.upi-pay-box {
+    text-align: center;
+}
+
+.qr-frame {
+    background: #fff;
+    padding: 10px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.qr-frame img {
+    width: 140px;
+    height: 140px;
+}
+
+.upi-copy-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 2px solid var(--border);
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 12px;
 }
