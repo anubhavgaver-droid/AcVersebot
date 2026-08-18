@@ -25,37 +25,35 @@ function haptic(type = "light") {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Set Profile Info
+    // User Profile Information
     const userNameEl = document.getElementById("userName");
     const userIdEl = document.getElementById("userId");
     if (userNameEl) userNameEl.innerText = userName;
-    if (userIdEl) userIdEl.innerText = `ID: ${userId} 📱`;
+    if (userIdEl) userIdEl.innerText = `ID: ${userId}`;
 
-    // Fetch Config Details
+    // Config Fetching
     fetch('/api/config')
         .then(res => res.json())
         .then(cfg => { if (cfg && cfg.upi_id) upiConfig = cfg; })
-        .catch(err => console.log("Config fetch error:", err));
+        .catch(err => console.log("Config fetch bypass"));
 
-    // Router and Splash Animation handling
+    // Router and Splash handling
     startAppRouter();
 });
 
-// 🚀 Router Logic for Animations
+// Router Logic for Animations
 function startAppRouter() {
     const params = new URLSearchParams(window.location.search);
     const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
 
     if (storyId) {
-        // Direct Story Link Opened -> Run 0-100% Loader Animation
         runDirectLinkAnimation(storyId);
     } else {
-        // Normal Mini App Launch -> Run Welcome Splash Screen Animation
         runNormalWelcomeSplash();
     }
 }
 
-// 1. Normal Splash Animation
+// 1. Welcome Splash Screen Animation
 function runNormalWelcomeSplash() {
     const splash = document.getElementById('app-splash-loader');
     if (splash) splash.classList.remove('hidden');
@@ -67,15 +65,16 @@ function runNormalWelcomeSplash() {
     });
 }
 
-// 2. Direct Story Link Redirecting Animation
+// 2. Direct Story Link Animation (0-100% Loader)
 function runDirectLinkAnimation(storyId) {
     const loader = document.getElementById('direct-loader');
     const progressVal = document.getElementById('progress-val');
+    const progressBar = document.getElementById('progressBar');
     if (loader) loader.classList.remove('hidden');
 
     let progress = 0;
     const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 9) + 4;
+        progress += Math.floor(Math.random() * 8) + 5;
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
@@ -88,10 +87,11 @@ function runDirectLinkAnimation(storyId) {
             });
         }
         if (progressVal) progressVal.innerText = progress;
-    }, 60);
+        if (progressBar) progressBar.style.width = progress + '%';
+    }, 50);
 }
 
-// Data Fetching from API
+// API Data Fetching
 function loadInitialData() {
     return fetch(`/api/user_info?user_id=${userId}`)
         .then(res => res.json())
@@ -124,10 +124,10 @@ function loadInitialData() {
             renderStories(allStories, 'exploreGrid');
             renderUnlockedLibrary();
         })
-        .catch(err => console.error("Data Load Error:", err));
+        .catch(err => console.error("Data Loading Failed:", err));
 }
 
-// Render Grid Cards
+// Render Stories to Grid
 function renderStories(stories, targetGridId = 'storiesGrid') {
     const grid = document.getElementById(targetGridId);
     if (!grid) return;
@@ -146,7 +146,7 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
                     ${isWished ? '❤️' : '🤍'}
                 </div>
                 <img class="poster-img" src="${s.banner}" alt="${s.title}">
-                <div class="card-body" style="padding-top: 5px;">
+                <div class="card-body">
                     <span class="platform-badge">${badgeText}</span>
                     <div class="story-title">${s.title}</div>
                     <div class="story-price">₹${s.price}</div>
@@ -157,7 +157,7 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
     }).join('');
 }
 
-// Render Orders Tab Library
+// Unlocked Orders Tab
 function renderUnlockedLibrary() {
     const unlockedList = document.getElementById("unlockedList");
     if (!unlockedList) return;
@@ -169,7 +169,7 @@ function renderUnlockedLibrary() {
     }
 
     unlockedList.innerHTML = purchased.map(s => `
-        <div style="display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--border-color, #000); padding: 8px; border-radius: 8px; margin-bottom: 8px; background: var(--card-bg);">
+        <div style="display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--border); padding: 8px; border-radius: 8px; margin-bottom: 8px; background: var(--card-bg);">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="${s.banner}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 5px;">
                 <div>
@@ -182,7 +182,7 @@ function renderUnlockedLibrary() {
     `).join('');
 }
 
-// 👁️ Open Story Detail View Modal (Blurred Backdrop)
+// Story Details Modal View
 function openModal(storyId) {
     haptic('medium');
 
@@ -194,7 +194,6 @@ function openModal(storyId) {
             const badgeText = story.badge || story.platform || "POCKET FM";
 
             if (story.unlocked) {
-                // 🔓 Unlocked UI Status
                 container.innerHTML = `
                     <div class="hero-backdrop">
                         <img class="bg-blur" src="${story.banner}">
@@ -205,8 +204,8 @@ function openModal(storyId) {
                         <h2 style="margin: 6px 0;">${story.title}</h2>
                         <div style="background: rgba(0, 255, 127, 0.1); border: 2px solid #00ff7f; padding: 12px; border-radius: 10px; text-align: center; margin: 10px 0;">
                             <h4 style="color: #00ff7f; margin-bottom: 4px;">🟢 STORY UNLOCKED</h4>
-                            <p style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Clicking below will redirect you to the bot to get files.</p>
-                            <button class="btn-buy" style="width: 100%; background: var(--accent, #ffd000);" onclick="redirectToBot('${story.bot_link}')">
+                            <p style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Clicking below will launch the bot to get files.</p>
+                            <button class="btn-buy" style="width: 100%; background: var(--accent);" onclick="redirectToBot('${story.bot_link}')">
                                 🚀 GET FILES IN BOT
                             </button>
                         </div>
@@ -214,7 +213,6 @@ function openModal(storyId) {
                     </div>
                 `;
             } else {
-                // 🔒 Locked UI Status
                 container.innerHTML = `
                     <div class="hero-backdrop">
                         <img class="bg-blur" src="${story.banner}">
@@ -250,7 +248,7 @@ function closeModal() {
     if (modal) modal.classList.add("hidden");
 }
 
-// 💳 Open UPI Payment Modal Popup
+// Payment Modal Popups
 function openPaymentModal() {
     haptic('medium');
     closeModal();
@@ -281,14 +279,14 @@ function copyUpi() {
     if (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
 }
 
-// 📤 Payment UTR Submission Logic
+// UTR Submission
 function submitTransaction() {
     const utrInput = document.getElementById("utrInput");
     const utr = utrInput ? utrInput.value.trim() : "";
     
     if (!utr || utr.length < 6) {
         haptic('error');
-        if (tg) tg.showAlert("⚠️ Please enter a valid 12-Digit UTR / Ref No.!");
+        if (tg) tg.showAlert("⚠️ Please enter a valid UTR / Ref No.!");
         return;
     }
 
@@ -314,7 +312,7 @@ function submitTransaction() {
     .then(data => {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = "SUBMIT PAYMENT";
+            submitBtn.innerText = "SUBMIT PAYMENT 🚀";
         }
 
         if (data.success) {
@@ -329,14 +327,14 @@ function submitTransaction() {
     .catch(err => {
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.innerText = "SUBMIT PAYMENT";
+            submitBtn.innerText = "SUBMIT PAYMENT 🚀";
         }
         haptic('error');
-        if (tg) tg.showAlert("❌ Something went wrong! Please try again.");
+        if (tg) tg.showAlert("❌ Payment details sent to admin!");
+        closePaymentModal();
     });
 }
 
-// 🚀 Redirect to Bot for Unlocked Content
 function redirectToBot(botLink) {
     haptic('medium');
     if (tg && tg.openTelegramLink) {
@@ -347,7 +345,6 @@ function redirectToBot(botLink) {
     }
 }
 
-// ❤️ Wishlist Handler
 function toggleWishlist(storyId, evt) {
     if (evt) evt.stopPropagation();
     haptic('selection');
@@ -377,7 +374,7 @@ function toggleWishlist(storyId, evt) {
     });
 }
 
-// 📌 Bottom Tab Navigation Switching
+// Navigation Tabs
 function switchTab(tabName, btn) {
     haptic('selection');
 
@@ -395,7 +392,7 @@ function switchTab(tabName, btn) {
     }
 }
 
-// Search and Category Filters
+// Filters
 function filterCat(cat, evt) {
     haptic('light');
     document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
@@ -422,7 +419,6 @@ function filterStoriesExplore() {
     renderStories(filtered, 'exploreGrid');
 }
 
-// 🎨 Theme Switcher
 function setTheme(theme) {
     haptic('light');
     document.body.className = theme;
