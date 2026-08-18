@@ -4,6 +4,7 @@ if (tg) {
     tg.ready();
 }
 
+// Global Application State
 let allStories = [];
 let userUnlockedStories = [];
 let userWishlist = [];
@@ -24,6 +25,7 @@ function haptic(type = "light") {
     }
 }
 
+// Initialization on DOM Load
 document.addEventListener("DOMContentLoaded", () => {
     const userNameEl = document.getElementById("userName");
     const userIdEl = document.getElementById("userId");
@@ -56,7 +58,7 @@ function runNormalWelcomeSplash() {
     loadInitialData().then(() => {
         setTimeout(() => {
             if (splash) splash.classList.add('hidden');
-        }, 1500);
+        }, 1200);
     });
 }
 
@@ -76,13 +78,13 @@ function runDirectLinkAnimation(storyId) {
             loadInitialData().then(() => {
                 setTimeout(() => {
                     if (loader) loader.classList.add('hidden');
-                    openModal(storyId);
+                    window.openModal(storyId);
                 }, 300);
             });
         }
         if (progressVal) progressVal.innerText = progress;
         if (progressBar) progressBar.style.width = progress + '%';
-    }, 50);
+    }, 40);
 }
 
 function loadInitialData() {
@@ -120,6 +122,7 @@ function loadInitialData() {
         .catch(err => console.error("Data Loading Failed:", err));
 }
 
+// 🎯 STORIES RENDER FUNCTION
 function renderStories(stories, targetGridId = 'storiesGrid') {
     const grid = document.getElementById(targetGridId);
     if (!grid) return;
@@ -132,9 +135,11 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
     grid.innerHTML = stories.map(s => {
         const isWished = userWishlist.includes(s.story_id);
         const badgeText = s.badge || s.platform || "POCKET FM";
+        const safeStoryId = encodeURIComponent(s.story_id);
+
         return `
             <div class="story-card">
-                <div class="wishlist-heart ${isWished ? 'active' : ''}" onclick="toggleWishlist('${s.story_id}', event)">
+                <div class="wishlist-heart ${isWished ? 'active' : ''}" onclick="window.toggleWishlist('${safeStoryId}', event)">
                     ${isWished ? '❤️' : '🤍'}
                 </div>
                 <img class="poster-img" src="${s.banner}" alt="${s.title}">
@@ -142,7 +147,7 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
                     <span class="platform-badge">${badgeText}</span>
                     <div class="story-title">${s.title}</div>
                     <div class="story-price">₹${s.price}</div>
-                    <button class="view-btn" onclick="openModal('${s.story_id}')">VIEW DETAILS</button>
+                    <button class="view-btn" id="btn-${safeStoryId}" onclick="window.openModal('${safeStoryId}', this)">VIEW DETAILS</button>
                 </div>
             </div>
         `;
@@ -155,30 +160,43 @@ function renderUnlockedLibrary() {
 
     const purchased = allStories.filter(s => userUnlockedStories.includes(s.story_id));
     if (purchased.length === 0) {
-        unlockedList.innerHTML = `<p style="font-size: 12px; color: #777;">No unlocked stories found!</p>`;
+        unlockedList.innerHTML = `<p style="font-size: 12px; color: #777; text-align: center; padding: 20px;">No unlocked stories found!</p>`;
         return;
     }
 
-    unlockedList.innerHTML = purchased.map(s => `
-        <div style="display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--border); padding: 8px; border-radius: 8px; margin-bottom: 8px; background: var(--card-bg);">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="${s.banner}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 5px;">
-                <div>
-                    <div style="font-size: 12px; font-weight: bold;">${s.title}</div>
-                    <span class="platform-badge" style="font-size: 8px;">UNLOCKED 🟢</span>
+    unlockedList.innerHTML = purchased.map(s => {
+        const safeStoryId = encodeURIComponent(s.story_id);
+        return `
+            <div style="display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--border); padding: 8px; border-radius: 8px; margin-bottom: 8px; background: var(--card-bg);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="${s.banner}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 5px;">
+                    <div>
+                        <div style="font-size: 12px; font-weight: bold;">${s.title}</div>
+                        <span class="platform-badge" style="font-size: 8px;">UNLOCKED 🟢</span>
+                    </div>
                 </div>
+                <button class="view-btn" style="width: auto; padding: 6px 12px;" onclick="window.openModal('${safeStoryId}', this)">OPEN</button>
             </div>
-            <button class="view-btn" style="width: auto; padding: 6px 12px;" onclick="openModal('${s.story_id}')">OPEN</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
-// 🎯 FIXED OPEN MODAL FUNCTION
-function openModal(storyId) {
+// 🎯 GLOBAL WINDOW ATTACHED FUNCTIONS (To Fix Inline Onclick Errors)
+
+window.openModal = function(rawStoryId, btnElement = null) {
     haptic('medium');
+    const storyId = decodeURIComponent(rawStoryId);
+
+    if (btnElement) {
+        btnElement.innerText = "LOADING...";
+        btnElement.disabled = true;
+    }
 
     fetch(`/api/story_details?user_id=${userId}&story_id=${storyId}`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Failed to load story");
+            return res.json();
+        })
         .then(story => {
             currentStory = story;
             const container = document.getElementById("modalContainer");
@@ -196,7 +214,7 @@ function openModal(storyId) {
                         <div style="background: rgba(0, 255, 127, 0.1); border: 2px solid #00ff7f; padding: 12px; border-radius: 10px; text-align: center; margin: 10px 0;">
                             <h4 style="color: #00ff7f; margin-bottom: 4px;">🟢 STORY UNLOCKED</h4>
                             <p style="font-size: 11px; color: #aaa; margin-bottom: 10px;">Clicking below will launch the bot to get files.</p>
-                            <button class="btn-buy" style="width: 100%; background: var(--accent);" onclick="redirectToBot('${story.bot_link}')">
+                            <button class="btn-buy" style="width: 100%; background: var(--accent);" onclick="window.redirectToBot('${story.bot_link}')">
                                 🚀 GET FILES IN BOT
                             </button>
                         </div>
@@ -220,7 +238,7 @@ function openModal(storyId) {
                             <span style="font-size:10px; color:#777;">TOTAL PRICE</span>
                             <div style="font-size:18px; font-weight:900; color:var(--text);">₹${story.price}</div>
                         </div>
-                        <button class="btn-buy" style="width: auto; padding: 10px 20px;" onclick="openPaymentModal()">BUY & UNLOCK</button>
+                        <button class="btn-buy" style="width: auto; padding: 10px 20px;" onclick="window.openPaymentModal()">BUY & UNLOCK</button>
                     </div>
                 `;
             }
@@ -228,24 +246,31 @@ function openModal(storyId) {
             const modal = document.getElementById("storyModal");
             if (modal) {
                 modal.classList.remove("hidden");
-                document.body.style.overflow = "hidden"; // Disable background scrolling
+                document.body.style.overflow = "hidden";
             }
         })
         .catch(err => {
-            if (tg) tg.showAlert("Error loading story details!");
+            console.error("Modal Fetch Error:", err);
+            if (tg) tg.showAlert("⚠️ Error loading story details!");
+        })
+        .finally(() => {
+            if (btnElement) {
+                btnElement.innerText = "VIEW DETAILS";
+                btnElement.disabled = false;
+            }
         });
-}
+};
 
-function closeModal() {
+window.closeModal = function() {
     haptic('light');
     const modal = document.getElementById("storyModal");
     if (modal) modal.classList.add("hidden");
-    document.body.style.overflow = "auto"; // Enable background scrolling
-}
+    document.body.style.overflow = "auto";
+};
 
-function openPaymentModal() {
+window.openPaymentModal = function() {
     haptic('medium');
-    closeModal();
+    window.closeModal();
 
     const payAmountVal = document.getElementById('payAmountVal');
     const upiIdText = document.getElementById('upiIdText');
@@ -262,22 +287,22 @@ function openPaymentModal() {
         payModal.classList.remove('hidden');
         document.body.style.overflow = "hidden";
     }
-}
+};
 
-function closePaymentModal() {
+window.closePaymentModal = function() {
     haptic('light');
     const payModal = document.getElementById('paymentModal');
     if (payModal) payModal.classList.add('hidden');
     document.body.style.overflow = "auto";
-}
+};
 
-function copyUpi() {
+window.copyUpi = function() {
     navigator.clipboard.writeText(upiConfig.upi_id);
     haptic('success');
     if (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
-}
+};
 
-function submitTransaction() {
+window.submitTransaction = function() {
     const utrInput = document.getElementById("utrInput");
     const utr = utrInput ? utrInput.value.trim() : "";
     
@@ -315,7 +340,7 @@ function submitTransaction() {
         if (data.success) {
             haptic('success');
             if (tg) tg.showAlert("✅ Payment Sent for Approval!\nYour payment details have been sent to our admin for verification.");
-            closePaymentModal();
+            window.closePaymentModal();
         } else {
             haptic('error');
             if (tg) tg.showAlert("❌ Error: " + data.message);
@@ -328,11 +353,11 @@ function submitTransaction() {
         }
         haptic('error');
         if (tg) tg.showAlert("❌ Payment details sent to admin!");
-        closePaymentModal();
+        window.closePaymentModal();
     });
-}
+};
 
-function redirectToBot(botLink) {
+window.redirectToBot = function(botLink) {
     haptic('medium');
     if (tg && tg.openTelegramLink) {
         tg.openTelegramLink(botLink);
@@ -340,11 +365,12 @@ function redirectToBot(botLink) {
     } else {
         window.open(botLink, '_blank');
     }
-}
+};
 
-function toggleWishlist(storyId, evt) {
+window.toggleWishlist = function(rawStoryId, evt) {
     if (evt) evt.stopPropagation();
     haptic('selection');
+    const storyId = decodeURIComponent(rawStoryId);
 
     fetch('/api/toggle_wishlist', {
         method: 'POST',
@@ -369,29 +395,43 @@ function toggleWishlist(storyId, evt) {
         renderStories(allStories, 'storiesGrid');
         renderStories(allStories, 'exploreGrid');
     });
-}
+};
 
-function switchTab(tabName, btn) {
+window.switchTab = function(tabName, btnElement = null) {
     haptic('selection');
 
-    closeModal();
-    closePaymentModal();
+    window.closeModal();
+    window.closePaymentModal();
 
+    // Hide all view panels
     document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-    const activeView = document.getElementById(`view-${tabName}`);
-    if (activeView) activeView.classList.remove('hidden');
+    // Reveal target tab view
+    let targetView = document.getElementById(`view-${tabName}`) || document.getElementById(tabName);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+    }
 
-    if (btn) {
-        btn.classList.add('active');
+    // Highlight bottom nav button
+    if (btnElement) {
+        btnElement.classList.add('active');
     } else {
         const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
         if (matchingBtn) matchingBtn.classList.add('active');
     }
-}
 
-function filterCat(cat, evt) {
+    // Auto Refresh tab contents
+    if (tabName === 'explore') {
+        renderStories(allStories, 'exploreGrid');
+    } else if (tabName === 'orders' || tabName === 'library') {
+        renderUnlockedLibrary();
+    } else if (tabName === 'home') {
+        renderStories(allStories, 'storiesGrid');
+    }
+};
+
+window.filterCat = function(cat, evt) {
     haptic('light');
     document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
     if (evt && evt.target) evt.target.classList.add('active');
@@ -401,27 +441,26 @@ function filterCat(cat, evt) {
     } else {
         renderStories(allStories.filter(s => s.category === cat || s.badge === cat || s.platform === cat), 'storiesGrid');
     }
-}
+};
 
-function filterStories() {
+window.filterStories = function() {
     const searchInput = document.getElementById("searchInput");
     const q = searchInput ? searchInput.value.toLowerCase() : "";
     const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
     renderStories(filtered, 'storiesGrid');
-}
+};
 
-function filterStoriesExplore() {
+window.filterStoriesExplore = function() {
     const exploreInput = document.getElementById("exploreInput");
     const q = exploreInput ? exploreInput.value.toLowerCase() : "";
     const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
     renderStories(filtered, 'exploreGrid');
-}
+};
 
-function setTheme(theme, evt) {
+window.setTheme = function(theme, evt) {
     haptic('light');
     document.body.className = theme;
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
     
-    const targetBtn = evt ? evt.target : (typeof event !== 'undefined' ? event.target : null);
-    if (targetBtn) targetBtn.classList.add('active-theme');
-}
+    if (evt && evt.target) evt.target.classList.add('active-theme');
+};
