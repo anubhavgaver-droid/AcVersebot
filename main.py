@@ -143,19 +143,18 @@ app = Client(
 
 web_app.config["BOT_CLIENT"] = app
 
-def start_bot():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    app.start()
-    print("🤖 Bot Started Successfully!")
-    idle()
-    app.stop()
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    web_app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
+    # Flask Web App को थ्रेड में चलाएँ
+    Thread(target=run_flask, daemon=True).start()
     
-    # Bot Start in Async Thread
-    Thread(target=start_bot, daemon=True).start()
+    print("🚀 Web Server & Bot Starting...")
     
-    print(f"🚀 ACVerse Server Running on Port {port}!")
-    web_app.run(host="0.0.0.0", port=port)
+    # Pyrogram Bot को Main Thread में चलाएँ
+    app.start()
+    print("🤖 ACVerse Bot Started Successfully!")
+    idle()
+    app.stop()
