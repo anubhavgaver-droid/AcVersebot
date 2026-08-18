@@ -1,146 +1,146 @@
-Const tg = window.Telegram?.WebApp;
+const tg = window.Telegram?.WebApp;
 if (tg) {
-    Tg.expand();
-    Tg.ready();
+    tg.expand();
+    tg.ready();
 }
 
-Let allStories = [];
+let allStories = [];
 let userUnlockedStories = [];
 let userWishlist = [];
 let upiConfig = { upi_id: "6398324472@fam" };
 let currentStory = null;
 
-Const userId = tg?.initDataUnsafe?.user?.id || 12345678;
+const userId = tg?.initDataUnsafe?.user?.id || 12345678;
 const userName = tg?.initDataUnsafe?.user?.first_name 
     ? (tg.initDataUnsafe.user.first_name + (tg.initDataUnsafe.user.last_name ? " " + tg.initDataUnsafe.user.last_name : ""))
     : "Guest User";
 
 // 🔔 Haptic Feedback Engine
 function haptic(type = "light") {
-    If (tg?.HapticFeedback) {
-        If (type === "success") tg.HapticFeedback.notificationOccurred("success");
-        Else if (type === "error") tg.HapticFeedback.notificationOccurred("error");
-        Else tg.HapticFeedback.impactOccurred(type);
+    if (tg?.HapticFeedback) {
+        if (type === "success") tg.HapticFeedback.notificationOccurred("success");
+        else if (type === "error") tg.HapticFeedback.notificationOccurred("error");
+        else tg.HapticFeedback.impactOccurred(type);
     }
 }
 
-Document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     // User Profile Information
-    Const userNameEl = document.getElementById("userName");
-    Const userIdEl = document.getElementById("userId");
-    If (userNameEl) userNameEl.innerText = userName;
-    If (userIdEl) userIdEl.innerText = `ID: ${userId}`;
+    const userNameEl = document.getElementById("userName");
+    const userIdEl = document.getElementById("userId");
+    if (userNameEl) userNameEl.innerText = userName;
+    if (userIdEl) userIdEl.innerText = `ID: ${userId}`;
 
     // Config Fetching
-    Fetch('/api/config')
+    fetch('/api/config')
         .then(res => res.json())
         .then(cfg => { if (cfg && cfg.upi_id) upiConfig = cfg; })
         .catch(err => console.log("Config fetch bypass"));
 
     // Router and Splash handling
-    StartAppRouter();
+    startAppRouter();
 });
 
 // Router Logic for Animations
 function startAppRouter() {
-    Const params = new URLSearchParams(window.location.search);
-    Const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
+    const params = new URLSearchParams(window.location.search);
+    const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
 
-    If (storyId) {
-        RunDirectLinkAnimation(storyId);
+    if (storyId) {
+        runDirectLinkAnimation(storyId);
     } else {
-        RunNormalWelcomeSplash();
+        runNormalWelcomeSplash();
     }
 }
 
 // 1. Welcome Splash Screen Animation
 function runNormalWelcomeSplash() {
-    Const splash = document.getElementById('app-splash-loader');
-    If (splash) splash.classList.remove('hidden');
+    const splash = document.getElementById('app-splash-loader');
+    if (splash) splash.classList.remove('hidden');
 
-    LoadInitialData().then(() => {
-        SetTimeout(() => {
-            If (splash) splash.classList.add('hidden');
+    loadInitialData().then(() => {
+        setTimeout(() => {
+            if (splash) splash.classList.add('hidden');
         }, 2000);
     });
 }
 
 // 2. Direct Story Link Animation (0-100% Loader)
 function runDirectLinkAnimation(storyId) {
-    Const loader = document.getElementById('direct-loader');
-    Const progressVal = document.getElementById('progress-val');
-    Const progressBar = document.getElementById('progressBar');
-    If (loader) loader.classList.remove('hidden');
+    const loader = document.getElementById('direct-loader');
+    const progressVal = document.getElementById('progress-val');
+    const progressBar = document.getElementById('progressBar');
+    if (loader) loader.classList.remove('hidden');
 
-    Let progress = 0;
-    Const interval = setInterval(() => {
-        Progress += Math.floor(Math.random() * 8) + 5;
-        If (progress >= 100) {
-            Progress = 100;
-            ClearInterval(interval);
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.floor(Math.random() * 8) + 5;
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
 
-            LoadInitialData().then(() => {
-                SetTimeout(() => {
-                    If (loader) loader.classList.add('hidden');
-                    OpenModal(storyId);
+            loadInitialData().then(() => {
+                setTimeout(() => {
+                    if (loader) loader.classList.add('hidden');
+                    openModal(storyId);
                 }, 300);
             });
         }
-        If (progressVal) progressVal.innerText = progress;
-        If (progressBar) progressBar.style.width = progress + '%';
+        if (progressVal) progressVal.innerText = progress;
+        if (progressBar) progressBar.style.width = progress + '%';
     }, 50);
 }
 
 // API Data Fetching
 function loadInitialData() {
-    Return fetch(`/api/user_info?user_id=${userId}`)
+    return fetch(`/api/user_info?user_id=${userId}`)
         .then(res => res.json())
         .then(usr => {
-            UserUnlockedStories = usr.unlocked_stories || [];
-            UserWishlist = usr.wishlist || [];
+            userUnlockedStories = usr.unlocked_stories || [];
+            userWishlist = usr.wishlist || [];
 
-            Const unlockedEl = document.getElementById("unlockedCount");
-            Const headerUnlockedEl = document.getElementById("headerUnlockedCount");
-            Const wishlistStatusEl = document.getElementById("wishlistStatus");
+            const unlockedEl = document.getElementById("unlockedCount");
+            const headerUnlockedEl = document.getElementById("headerUnlockedCount");
+            const wishlistStatusEl = document.getElementById("wishlistStatus");
 
-            If (unlockedEl) unlockedEl.innerText = userUnlockedStories.length;
-            If (headerUnlockedEl) headerUnlockedEl.innerText = userUnlockedStories.length;
+            if (unlockedEl) unlockedEl.innerText = userUnlockedStories.length;
+            if (headerUnlockedEl) headerUnlockedEl.innerText = userUnlockedStories.length;
 
-            If (wishlistStatusEl) {
-                WishlistStatusEl.innerText = userWishlist.length > 0 
+            if (wishlistStatusEl) {
+                wishlistStatusEl.innerText = userWishlist.length > 0 
                     ? `${userWishlist.length} Stories Saved` 
                     : "No saved stories yet!";
             }
 
-            Return fetch('/api/stories');
+            return fetch('/api/stories');
         })
         .then(res => res.json())
         .then(data => {
-            AllStories = data || [];
-            Const totalShowsEl = document.getElementById("totalShows");
-            If (totalShowsEl) totalShowsEl.innerText = allStories.length;
+            allStories = data || [];
+            const totalShowsEl = document.getElementById("totalShows");
+            if (totalShowsEl) totalShowsEl.innerText = allStories.length;
 
-            RenderStories(allStories, 'storiesGrid');
-            RenderStories(allStories, 'exploreGrid');
-            RenderUnlockedLibrary();
+            renderStories(allStories, 'storiesGrid');
+            renderStories(allStories, 'exploreGrid');
+            renderUnlockedLibrary();
         })
         .catch(err => console.error("Data Loading Failed:", err));
 }
 
 // Render Stories to Grid
 function renderStories(stories, targetGridId = 'storiesGrid') {
-    Const grid = document.getElementById(targetGridId);
-    If (!grid) return;
+    const grid = document.getElementById(targetGridId);
+    if (!grid) return;
 
-    If (stories.length === 0) {
-        Grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #777; font-size: 12px; padding: 20px;">No stories found</p>`;
-        Return;
+    if (stories.length === 0) {
+        grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #777; font-size: 12px; padding: 20px;">No stories found</p>`;
+        return;
     }
 
-    Grid.innerHTML = stories.map(s => {
-        Const isWished = userWishlist.includes(s.story_id);
-        Const badgeText = s.badge || s.platform || "POCKET FM";
-        Return `
+    grid.innerHTML = stories.map(s => {
+        const isWished = userWishlist.includes(s.story_id);
+        const badgeText = s.badge || s.platform || "POCKET FM";
+        return `
             <div class="story-card">
                 <div class="wishlist-heart ${isWished ? 'active' : ''}" onclick="toggleWishlist('${s.story_id}', event)">
                     ${isWished ? '❤️' : '🤍'}
@@ -159,16 +159,16 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
 
 // Unlocked Orders Tab
 function renderUnlockedLibrary() {
-    Const unlockedList = document.getElementById("unlockedList");
-    If (!unlockedList) return;
+    const unlockedList = document.getElementById("unlockedList");
+    if (!unlockedList) return;
 
-    Const purchased = allStories.filter(s => userUnlockedStories.includes(s.story_id));
-    If (purchased.length === 0) {
-        UnlockedList.innerHTML = `<p style="font-size: 12px; color: #777;">No unlocked stories found!</p>`;
-        Return;
+    const purchased = allStories.filter(s => userUnlockedStories.includes(s.story_id));
+    if (purchased.length === 0) {
+        unlockedList.innerHTML = `<p style="font-size: 12px; color: #777;">No unlocked stories found!</p>`;
+        return;
     }
 
-    UnlockedList.innerHTML = purchased.map(s => `
+    unlockedList.innerHTML = purchased.map(s => `
         <div style="display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--border); padding: 8px; border-radius: 8px; margin-bottom: 8px; background: var(--card-bg);">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="${s.banner}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 5px;">
@@ -184,17 +184,17 @@ function renderUnlockedLibrary() {
 
 // Story Details Modal View
 function openModal(storyId) {
-    Haptic('medium');
+    haptic('medium');
 
-    Fetch(`/api/story_details?user_id=${userId}&story_id=${storyId}`)
+    fetch(`/api/story_details?user_id=${userId}&story_id=${storyId}`)
         .then(res => res.json())
         .then(story => {
-            CurrentStory = story;
-            Const container = document.getElementById("modalContainer");
-            Const badgeText = story.badge || story.platform || "POCKET FM";
+            currentStory = story;
+            const container = document.getElementById("modalContainer");
+            const badgeText = story.badge || story.platform || "POCKET FM";
 
-            If (story.unlocked) {
-                Container.innerHTML = `
+            if (story.unlocked) {
+                container.innerHTML = `
                     <div class="hero-backdrop">
                         <img class="bg-blur" src="${story.banner}">
                         <img class="poster-corner" src="${story.banner}">
@@ -213,7 +213,7 @@ function openModal(storyId) {
                     </div>
                 `;
             } else {
-                Container.innerHTML = `
+                container.innerHTML = `
                     <div class="hero-backdrop">
                         <img class="bg-blur" src="${story.banner}">
                         <img class="poster-corner" src="${story.banner}">
@@ -234,203 +234,200 @@ function openModal(storyId) {
                 `;
             }
 
-            Const modal = document.getElementById("storyModal");
-            If (modal) modal.classList.remove("hidden");
+            const modal = document.getElementById("storyModal");
+            if (modal) modal.classList.remove("hidden");
         })
         .catch(err => {
-            If (tg) tg.showAlert("Error loading story details!");
+            if (tg) tg.showAlert("Error loading story details!");
         });
 }
 
-Function closeModal() {
-    Haptic('light');
-    Const modal = document.getElementById("storyModal");
-    If (modal) modal.classList.add("hidden");
+function closeModal() {
+    haptic('light');
+    const modal = document.getElementById("storyModal");
+    if (modal) modal.classList.add("hidden");
 }
 
 // Payment Modal Popups
 function openPaymentModal() {
-    Haptic('medium');
-    CloseModal();
+    haptic('medium');
+    closeModal();
 
-    Const payAmountVal = document.getElementById('payAmountVal');
-    Const upiIdText = document.getElementById('upiIdText');
-    Const paymentQr = document.getElementById('paymentQr');
-    Const payModal = document.getElementById('paymentModal');
+    const payAmountVal = document.getElementById('payAmountVal');
+    const upiIdText = document.getElementById('upiIdText');
+    const paymentQr = document.getElementById('paymentQr');
+    const payModal = document.getElementById('paymentModal');
 
-    If (payAmountVal) payAmountVal.innerText = currentStory.price;
-    If (upiIdText) upiIdText.innerText = upiConfig.upi_id;
-    If (paymentQr) {
-        PaymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiConfig.upi_id}%26pn=ACVerse%26am=${currentStory.price}`;
+    if (payAmountVal) payAmountVal.innerText = currentStory.price;
+    if (upiIdText) upiIdText.innerText = upiConfig.upi_id;
+    if (paymentQr) {
+        paymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiConfig.upi_id}%26pn=ACVerse%26am=${currentStory.price}`;
     }
 
-    If (payModal) payModal.classList.remove('hidden');
+    if (payModal) payModal.classList.remove('hidden');
 }
 
-Function closePaymentModal() {
-    Haptic('light');
-    Const payModal = document.getElementById('paymentModal');
-    If (payModal) payModal.classList.add('hidden');
+function closePaymentModal() {
+    haptic('light');
+    const payModal = document.getElementById('paymentModal');
+    if (payModal) payModal.classList.add('hidden');
 }
 
-Function copyUpi() {
-    Navigator.clipboard.writeText(upiConfig.upi_id);
-    Haptic('success');
-    If (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
+function copyUpi() {
+    navigator.clipboard.writeText(upiConfig.upi_id);
+    haptic('success');
+    if (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
 }
 
 // UTR Submission
 function submitTransaction() {
-    Const utrInput = document.getElementById("utrInput");
-    Const utr = utrInput ? UtrInput.value.trim() : "";
+    const utrInput = document.getElementById("utrInput");
+    const utr = utrInput ? utrInput.value.trim() : "";
     
-    If (!utr || utr.length < 6) {
-        Haptic('error');
-        If (tg) tg.showAlert("⚠️ Please enter a valid UTR / Ref No.!");
-        Return;
+    if (!utr || utr.length < 6) {
+        haptic('error');
+        if (tg) tg.showAlert("⚠️ Please enter a valid UTR / Ref No.!");
+        return;
     }
 
-    Haptic('medium');
-    Const submitBtn = document.getElementById("submitPayBtn");
-    If (submitBtn) {
-        SubmitBtn.disabled = true;
-        SubmitBtn.innerText = "SUBMITTING...";
+    haptic('medium');
+    const submitBtn = document.getElementById("submitPayBtn");
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "SUBMITTING...";
     }
 
-    Fetch('/api/submit_payment', {
-        Method: 'POST',
-        Headers: { 'Content-Type': 'application/json' },
-        Body: JSON.stringify({
-            User_id: userId,
-            User_name: userName,
-            Story_id: currentStory.story_id,
-            Amount: currentStory.price,
-            Utr: utr
+    fetch('/api/submit_payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: userId,
+            user_name: userName,
+            story_id: currentStory.story_id,
+            amount: currentStory.price,
+            utr: utr
         })
     })
     .then(res => res.json())
     .then(data => {
-        If (submitBtn) {
-            SubmitBtn.disabled = false;
-            SubmitBtn.innerText = "SUBMIT PAYMENT 🚀";
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "SUBMIT PAYMENT 🚀";
         }
 
-        If (data.success) {
-            Haptic('success');
-            If (tg) tg.showAlert("✅ Payment Sent for Approval!\nYour payment details have been sent to our admin for verification.");
-            ClosePaymentModal();
+        if (data.success) {
+            haptic('success');
+            if (tg) tg.showAlert("✅ Payment Sent for Approval!\nYour payment details have been sent to our admin for verification.");
+            closePaymentModal();
         } else {
-            Haptic('error');
-            If (tg) tg.showAlert("❌ Error: " + data.message);
+            haptic('error');
+            if (tg) tg.showAlert("❌ Error: " + data.message);
         }
     })
     .catch(err => {
-        If (submitBtn) {
-            SubmitBtn.disabled = false;
-            SubmitBtn.innerText = "SUBMIT PAYMENT 🚀";
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "SUBMIT PAYMENT 🚀";
         }
-        Haptic('error');
-        If (tg) tg.showAlert("❌ Payment details sent to admin!");
-        ClosePaymentModal();
+        haptic('error');
+        if (tg) tg.showAlert("❌ Payment details sent to admin!");
+        closePaymentModal();
     });
 }
 
-Function redirectToBot(botLink) {
-    Haptic('medium');
-    If (tg && tg.openTelegramLink) {
-        Tg.openTelegramLink(botLink);
-        Tg.close();
+function redirectToBot(botLink) {
+    haptic('medium');
+    if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(botLink);
+        tg.close();
     } else {
-        Window.open(botLink, '_blank');
+        window.open(botLink, '_blank');
     }
 }
 
-Function toggleWishlist(storyId, evt) {
-    If (evt) evt.stopPropagation();
-    Haptic('selection');
+function toggleWishlist(storyId, evt) {
+    if (evt) evt.stopPropagation();
+    haptic('selection');
 
-    Fetch('/api/toggle_wishlist', {
-        Method: 'POST',
-        Headers: { 'Content-Type': 'application/json' },
-        Body: JSON.stringify({ user_id: userId, story_id: storyId })
+    fetch('/api/toggle_wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, story_id: storyId })
     })
     .then(res => res.json())
     .then(data => {
-        If (data.status === 'added') {
-            UserWishlist.push(storyId);
+        if (data.status === 'added') {
+            userWishlist.push(storyId);
         } else {
-            UserWishlist = userWishlist.filter(id => id !== storyId);
+            userWishlist = userWishlist.filter(id => id !== storyId);
         }
         
-        Const wishlistStatusEl = document.getElementById("wishlistStatus");
-        If (wishlistStatusEl) {
-            WishlistStatusEl.innerText = userWishlist.length > 0 
+        const wishlistStatusEl = document.getElementById("wishlistStatus");
+        if (wishlistStatusEl) {
+            wishlistStatusEl.innerText = userWishlist.length > 0 
                 ? `${userWishlist.length} Stories Saved` 
                 : "No saved stories yet!";
         }
 
-        RenderStories(allStories, 'storiesGrid');
-        RenderStories(allStories, 'exploreGrid');
+        renderStories(allStories, 'storiesGrid');
+        renderStories(allStories, 'exploreGrid');
     });
 }
 
-// Navigation Tabs (Updated with Auto-Dismiss for Modals)
-Function switchTab(tabName, btn) {
-    Haptic('selection');
+// Navigation Tabs
+function switchTab(tabName, btn) {
+    haptic('selection');
 
-    // 1. Koi bhi modal khula ho toh automatic close karein
-    CloseModal();
-    ClosePaymentModal();
+    // Auto close any active modals
+    closeModal();
+    closePaymentModal();
 
-    // 2. Hide all tab views
-    Document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
-    Document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-    // 3. Show target view
-    Const activeView = document.getElementById(`view-${tabName}`);
-    If (activeView) activeView.classList.remove('hidden');
+    const activeView = document.getElementById(`view-${tabName}`);
+    if (activeView) activeView.classList.remove('hidden');
 
-    // 4. Highlight active button
-    If (btn) {
-        Btn.classList.add('active');
+    if (btn) {
+        btn.classList.add('active');
     } else {
-        Const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
-        If (matchingBtn) matchingBtn.classList.add('active');
+        const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
+        if (matchingBtn) matchingBtn.classList.add('active');
     }
 }
 
 // Filters
-Function filterCat(cat, evt) {
-    Haptic('light');
-    Document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
-    If (evt && evt.target) evt.target.classList.add('active');
+function filterCat(cat, evt) {
+    haptic('light');
+    document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
+    if (evt && evt.target) evt.target.classList.add('active');
 
-    If (cat === 'All') {
-        RenderStories(allStories, 'storiesGrid');
+    if (cat === 'All') {
+        renderStories(allStories, 'storiesGrid');
     } else {
-        RenderStories(allStories.filter(s => s.category === cat || s.badge === cat || s.platform === cat), 'storiesGrid');
+        renderStories(allStories.filter(s => s.category === cat || s.badge === cat || s.platform === cat), 'storiesGrid');
     }
 }
 
-Function filterStories() {
-    Const searchInput = document.getElementById("searchInput");
-    Const q = searchInput ? SearchInput.value.toLowerCase() : "";
-    Const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
-    RenderStories(filtered, 'storiesGrid');
+function filterStories() {
+    const searchInput = document.getElementById("searchInput");
+    const q = searchInput ? searchInput.value.toLowerCase() : "";
+    const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
+    renderStories(filtered, 'storiesGrid');
 }
 
-Function filterStoriesExplore() {
-    Const exploreInput = document.getElementById("exploreInput");
-    Const q = exploreInput ? ExploreInput.value.toLowerCase() : "";
-    Const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
-    RenderStories(filtered, 'exploreGrid');
+function filterStoriesExplore() {
+    const exploreInput = document.getElementById("exploreInput");
+    const q = exploreInput ? exploreInput.value.toLowerCase() : "";
+    const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
+    renderStories(filtered, 'exploreGrid');
 }
 
-Function setTheme(theme, evt) {
-    Haptic('light');
-    Document.body.className = theme;
-    Document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
+function setTheme(theme, evt) {
+    haptic('light');
+    document.body.className = theme;
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
     
-    Const targetBtn = evt ? Evt.target : (typeof event !== 'undefined' ? Event.target : null);
-    If (targetBtn) targetBtn.classList.add('active-theme');
+    const targetBtn = evt ? evt.target : (typeof event !== 'undefined' ? event.target : null);
+    if (targetBtn) targetBtn.classList.add('active-theme');
 }
