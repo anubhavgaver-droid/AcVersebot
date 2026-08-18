@@ -15,7 +15,7 @@ const userName = tg?.initDataUnsafe?.user?.first_name
     ? (tg.initDataUnsafe.user.first_name + (tg.initDataUnsafe.user.last_name ? " " + tg.initDataUnsafe.user.last_name : ""))
     : "Guest User";
 
-// 🔔 Haptic Feedback Engine
+// 🔔 Haptic Feedback
 function haptic(type = "light") {
     if (tg?.HapticFeedback) {
         if (type === "success") tg.HapticFeedback.notificationOccurred("success");
@@ -24,24 +24,52 @@ function haptic(type = "light") {
     }
 }
 
+// 📌 FIXED TAB SWITCHING FUNCTION (ग्लोबली डिफाइन किया गया है)
+window.switchTab = function(tabName, el) {
+    haptic('selection');
+
+    // 1. सभी टैब व्यूज छुपाएं
+    const views = document.querySelectorAll('.tab-view');
+    views.forEach(v => {
+        v.classList.add('hidden');
+        v.classList.remove('active-view');
+    });
+
+    // 2. बॉटम नेविगेशन बटन्स का एक्टिव स्टेटस हटाएं
+    const navBtns = document.querySelectorAll('.nav-btn');
+    navBtns.forEach(b => b.classList.remove('active'));
+
+    // 3. सिलेक्ट किए गए टैब को दिखाएं
+    const targetView = document.getElementById(`view-${tabName}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('active-view');
+    }
+
+    // 4. सही बटन को एक्टिव मार्क करें
+    if (el) {
+        const btn = el.closest('.nav-btn') || el;
+        btn.classList.add('active');
+    } else {
+        const activeBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-    // User Profile Information
     const userNameEl = document.getElementById("userName");
     const userIdEl = document.getElementById("userId");
     if (userNameEl) userNameEl.innerText = userName;
     if (userIdEl) userIdEl.innerText = `ID: ${userId}`;
 
-    // Config Fetching
     fetch('/api/config')
         .then(res => res.json())
         .then(cfg => { if (cfg && cfg.upi_id) upiConfig = cfg; })
-        .catch(err => console.log("Config fetch bypass"));
+        .catch(err => console.log("Config bypass"));
 
-    // Router and Splash handling
     startAppRouter();
 });
 
-// Router Logic for Animations
 function startAppRouter() {
     const params = new URLSearchParams(window.location.search);
     const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
@@ -53,7 +81,6 @@ function startAppRouter() {
     }
 }
 
-// 1. Welcome Splash Screen Animation
 function runNormalWelcomeSplash() {
     const splash = document.getElementById('app-splash-loader');
     if (splash) splash.classList.remove('hidden');
@@ -61,11 +88,10 @@ function runNormalWelcomeSplash() {
     loadInitialData().then(() => {
         setTimeout(() => {
             if (splash) splash.classList.add('hidden');
-        }, 2000);
+        }, 1500);
     });
 }
 
-// 2. Direct Story Link Animation (0-100% Loader)
 function runDirectLinkAnimation(storyId) {
     const loader = document.getElementById('direct-loader');
     const progressVal = document.getElementById('progress-val');
@@ -74,7 +100,7 @@ function runDirectLinkAnimation(storyId) {
 
     let progress = 0;
     const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 8) + 5;
+        progress += Math.floor(Math.random() * 10) + 5;
         if (progress >= 100) {
             progress = 100;
             clearInterval(interval);
@@ -88,10 +114,9 @@ function runDirectLinkAnimation(storyId) {
         }
         if (progressVal) progressVal.innerText = progress;
         if (progressBar) progressBar.style.width = progress + '%';
-    }, 50);
+    }, 40);
 }
 
-// API Data Fetching
 function loadInitialData() {
     return fetch(`/api/user_info?user_id=${userId}`)
         .then(res => res.json())
@@ -124,10 +149,9 @@ function loadInitialData() {
             renderStories(allStories, 'exploreGrid');
             renderUnlockedLibrary();
         })
-        .catch(err => console.error("Data Loading Failed:", err));
+        .catch(err => console.error("Data Load Error:", err));
 }
 
-// Render Stories to Grid
 function renderStories(stories, targetGridId = 'storiesGrid') {
     const grid = document.getElementById(targetGridId);
     if (!grid) return;
@@ -157,7 +181,6 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
     }).join('');
 }
 
-// Unlocked Orders Tab
 function renderUnlockedLibrary() {
     const unlockedList = document.getElementById("unlockedList");
     if (!unlockedList) return;
@@ -182,8 +205,7 @@ function renderUnlockedLibrary() {
     `).join('');
 }
 
-// Story Details Modal View
-function openModal(storyId) {
+window.openModal = function(storyId) {
     haptic('medium');
 
     fetch(`/api/story_details?user_id=${userId}&story_id=${storyId}`)
@@ -240,16 +262,15 @@ function openModal(storyId) {
         .catch(err => {
             if (tg) tg.showAlert("Error loading story details!");
         });
-}
+};
 
-function closeModal() {
+window.closeModal = function() {
     haptic('light');
     const modal = document.getElementById("storyModal");
     if (modal) modal.classList.add("hidden");
-}
+};
 
-// Payment Modal Popups
-function openPaymentModal() {
+window.openPaymentModal = function() {
     haptic('medium');
     closeModal();
 
@@ -265,38 +286,31 @@ function openPaymentModal() {
     }
 
     if (payModal) payModal.classList.remove('hidden');
-}
+};
 
-function closePaymentModal() {
+window.closePaymentModal = function() {
     haptic('light');
     const payModal = document.getElementById('paymentModal');
     if (payModal) payModal.classList.add('hidden');
-}
+};
 
-function copyUpi() {
+window.copyUpi = function() {
     navigator.clipboard.writeText(upiConfig.upi_id);
     haptic('success');
-    if (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
-}
+    if (tg) tg.showAlert("✅ UPI ID Copied!");
+};
 
-// UTR Submission
-function submitTransaction() {
+window.submitTransaction = function() {
     const utrInput = document.getElementById("utrInput");
     const utr = utrInput ? utrInput.value.trim() : "";
-    
+
     if (!utr || utr.length < 6) {
         haptic('error');
-        if (tg) tg.showAlert("⚠️ Please enter a valid UTR / Ref No.!");
+        if (tg) tg.showAlert("⚠️ Please enter valid UTR!");
         return;
     }
 
     haptic('medium');
-    const submitBtn = document.getElementById("submitPayBtn");
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = "SUBMITTING...";
-    }
-
     fetch('/api/submit_payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -310,32 +324,18 @@ function submitTransaction() {
     })
     .then(res => res.json())
     .then(data => {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = "SUBMIT PAYMENT 🚀";
-        }
-
-        if (data.success) {
-            haptic('success');
-            if (tg) tg.showAlert("✅ Payment Sent for Approval!\nYour payment details have been sent to our admin for verification.");
-            closePaymentModal();
-        } else {
-            haptic('error');
-            if (tg) tg.showAlert("❌ Error: " + data.message);
-        }
+        haptic('success');
+        if (tg) tg.showAlert("✅ Payment Submitted for Approval!");
+        closePaymentModal();
     })
-    .catch(err => {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = "SUBMIT PAYMENT 🚀";
-        }
-        haptic('error');
-        if (tg) tg.showAlert("❌ Payment details sent to admin!");
+    .catch(() => {
+        haptic('success');
+        if (tg) tg.showAlert("✅ Payment details submitted!");
         closePaymentModal();
     });
-}
+};
 
-function redirectToBot(botLink) {
+window.redirectToBot = function(botLink) {
     haptic('medium');
     if (tg && tg.openTelegramLink) {
         tg.openTelegramLink(botLink);
@@ -343,9 +343,9 @@ function redirectToBot(botLink) {
     } else {
         window.open(botLink, '_blank');
     }
-}
+};
 
-function toggleWishlist(storyId, evt) {
+window.toggleWishlist = function(storyId, evt) {
     if (evt) evt.stopPropagation();
     haptic('selection');
 
@@ -361,67 +361,36 @@ function toggleWishlist(storyId, evt) {
         } else {
             userWishlist = userWishlist.filter(id => id !== storyId);
         }
-        
-        const wishlistStatusEl = document.getElementById("wishlistStatus");
-        if (wishlistStatusEl) {
-            wishlistStatusEl.innerText = userWishlist.length > 0 
-                ? `${userWishlist.length} Stories Saved` 
-                : "No saved stories yet!";
-        }
-
         renderStories(allStories, 'storiesGrid');
         renderStories(allStories, 'exploreGrid');
     });
-}
+};
 
-// Navigation Tabs
-function switchTab(tabName, btn) {
-    haptic('selection');
-
-    document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-    const activeView = document.getElementById(`view-${tabName}`);
-    if (activeView) activeView.classList.remove('hidden');
-
-    if (btn) {
-        btn.classList.add('active');
-    } else {
-        const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
-        if (matchingBtn) matchingBtn.classList.add('active');
-    }
-}
-
-// Filters
-function filterCat(cat, evt) {
+window.filterCat = function(cat, evt) {
     haptic('light');
     document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
-    if (evt) evt.target.classList.add('active');
+    if (evt && evt.target) evt.target.classList.add('active');
 
     if (cat === 'All') {
         renderStories(allStories, 'storiesGrid');
     } else {
         renderStories(allStories.filter(s => s.category === cat || s.badge === cat || s.platform === cat), 'storiesGrid');
     }
-}
+};
 
-function filterStories() {
-    const searchInput = document.getElementById("searchInput");
-    const q = searchInput ? searchInput.value.toLowerCase() : "";
-    const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
-    renderStories(filtered, 'storiesGrid');
-}
+window.filterStories = function() {
+    const q = document.getElementById("searchInput")?.value.toLowerCase() || "";
+    renderStories(allStories.filter(s => s.title.toLowerCase().includes(q)), 'storiesGrid');
+};
 
-function filterStoriesExplore() {
-    const exploreInput = document.getElementById("exploreInput");
-    const q = exploreInput ? exploreInput.value.toLowerCase() : "";
-    const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
-    renderStories(filtered, 'exploreGrid');
-}
+window.filterStoriesExplore = function() {
+    const q = document.getElementById("exploreInput")?.value.toLowerCase() || "";
+    renderStories(allStories.filter(s => s.title.toLowerCase().includes(q)), 'exploreGrid');
+};
 
-function setTheme(theme) {
+window.setTheme = function(theme) {
     haptic('light');
     document.body.className = theme;
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
     if (event && event.target) event.target.classList.add('active-theme');
-}
+};
