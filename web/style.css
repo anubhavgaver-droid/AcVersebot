@@ -11,11 +11,9 @@
     --accent: #ffcc00;
     --badge-blue: #2563eb;
     --badge-orange: #d97706;
-    --btn-hover: #e6b800;
     --shadow: 4px 4px 0px #000000;
 }
 
-/* Dark Theme Variables */
 body.dark-theme {
     --bg-color: #121214;
     --card-bg: #1e1e24;
@@ -27,7 +25,6 @@ body.dark-theme {
     --shadow: 4px 4px 0px #ffffff;
 }
 
-/* Cyber Theme Variables */
 body.cyber-theme {
     --bg-color: #0d1117;
     --card-bg: #161b22;
@@ -39,7 +36,7 @@ body.cyber-theme {
     --shadow: 4px 4px 0px #00e5ff;
 }
 
-/* 2. Global Resets & Layout */
+/* 2. Resets & Layout */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -53,7 +50,7 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     padding: 15px;
-    padding-bottom: 80px; /* Adjusted for Bottom Navigation */
+    padding-bottom: 80px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
@@ -61,7 +58,7 @@ body {
     display: none !important;
 }
 
-/* 3. Top Header Bar */
+/* 3. Header */
 .top-bar {
     display: flex;
     justify-content: space-between;
@@ -127,7 +124,7 @@ body {
     font-size: 16px;
 }
 
-/* 5. Categories Card */
+/* 5. Categories */
 .categories-card {
     background: var(--card-bg);
     border: 3px solid var(--border);
@@ -149,7 +146,6 @@ body {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding-bottom: 4px;
 }
 
 .tag {
@@ -193,7 +189,7 @@ body {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.9);
     border: 2px solid #000;
     border-radius: 50%;
     width: 28px;
@@ -269,13 +265,14 @@ body {
     box-shadow: none;
 }
 
-/* 7. User Profile Section */
-.user-card {
+/* 7. Profile Cards */
+.user-card, .info-card {
     background: var(--card-bg);
     border: 3px solid var(--border);
     border-radius: 12px;
     padding: 15px;
     box-shadow: var(--shadow);
+    margin-bottom: 15px;
 }
 
 .profile-header {
@@ -288,7 +285,7 @@ body {
 .avatar {
     width: 45px;
     height: 45px;
-    background: #e2e8f0;
+    background: var(--accent);
     border: 2px solid var(--border);
     border-radius: 8px;
     display: flex;
@@ -320,23 +317,8 @@ body {
     text-align: center;
 }
 
-.stat-box h2 {
-    font-size: 22px;
-    font-weight: 900;
-}
-
-.stat-box p {
-    font-size: 9px;
-    font-weight: 800;
-    color: #777;
-}
-
-.info-card {
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 15px;
-}
+.stat-box h2 { font-size: 22px; font-weight: 900; }
+.stat-box p { font-size: 9px; font-weight: 800; color: #777; }
 
 /* 8. Theme Switcher */
 .theme-section {
@@ -351,10 +333,7 @@ body {
     margin-bottom: 8px;
 }
 
-.theme-buttons {
-    display: flex;
-    gap: 6px;
-}
+.theme-buttons { display: flex; gap: 6px; }
 
 .theme-btn {
     flex: 1;
@@ -386,15 +365,13 @@ body {
     cursor: pointer;
 }
 
-/* 9. Modal Overlay & Blurred Hero Backdrop */
+/* 9. Modal Overlay & Blurred Hero */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.75);
-    z-index: 100;
+    z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -423,25 +400,19 @@ body {
 
 .close-btn {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #000;
-    color: #fff;
+    top: 15px; right: 15px;
+    background: #000; color: #fff;
     border: 2px solid var(--border);
-    width: 28px;
-    height: 28px;
+    width: 28px; height: 28px;
     border-radius: 50%;
-    font-size: 14px;
-    font-weight: 900;
+    font-size: 14px; font-weight: 900;
     cursor: pointer;
     z-index: 10;
 }
 
-/* Hero Blurred Backdrop in Story Modal */
 .hero-backdrop {
     position: relative;
-    width: 100%;
-    height: 180px;
+    width: 100%; height: 180px;
     border-radius: 10px;
     overflow: hidden;
     border: 2px solid var(--border);
@@ -449,8 +420,7 @@ body {
 }
 
 .hero-backdrop .bg-blur {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     object-fit: cover;
     filter: blur(12px) brightness(0.6);
     transform: scale(1.1);
@@ -458,25 +428,12 @@ body {
 
 .hero-backdrop .poster-corner {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    width: 100px;
-    height: 130px;
+    bottom: 10px; left: 10px;
+    width: 100px; height: 130px;
     object-fit: cover;
     border-radius: 8px;
     border: 2px solid #fff;
     box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-}
-
-.story-meta {
-    padding-top: 5px;
-}
-
-.genre-tag {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 8px;
 }
 
 .desc-box {
@@ -498,11 +455,10 @@ body {
     border-top: 2px dashed var(--border);
 }
 
-/* 10. Bottom Navigation Bar */
+/* 10. Bottom Nav */
 .bottom-nav {
     position: fixed;
-    bottom: 0;
-    left: 0;
+    bottom: 0; left: 0;
     width: 100%;
     background: var(--card-bg);
     border-top: 3px solid var(--border);
@@ -530,33 +486,75 @@ body {
     color: var(--accent);
 }
 
-.nav-btn span {
-    font-size: 18px;
-}
+.nav-btn span { font-size: 18px; }
 
-/* 11. Splash & Loader Animations */
+/* 11. Splash Overlay Animation */
 .splash-screen {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg-color);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: #0d0d0d;
+    color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 200;
+    z-index: 9999;
 }
 
+.splash-card, .loader-card {
+    text-align: center;
+    max-width: 300px;
+}
+
+.card-carousel {
+    position: relative;
+    height: 170px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.c-card {
+    position: absolute;
+    border-radius: 10px;
+    transition: all 0.5s ease;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.card-left { transform: translateX(-35px) scale(0.85) rotate(-10deg); opacity: 0.7; z-index: 1; }
+.card-center { transform: scale(1.05); z-index: 2; }
+.card-right { transform: translateX(35px) scale(0.85) rotate(10deg); opacity: 0.7; z-index: 1; }
+
+.welcome-title { font-size: 16px; font-weight: 900; margin-bottom: 6px; }
+.welcome-sub { font-size: 11px; color: #888; margin-bottom: 15px; line-height: 1.4; }
+
 .loader-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--border);
-    border-top: 4px solid var(--accent);
+    width: 26px; height: 26px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top: 3px solid #fff;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
-    margin-bottom: 15px;
+    margin: 0 auto;
+}
+
+.progress-percentage { font-size: 36px; font-weight: 900; color: var(--accent); margin: 10px 0; }
+
+.progress-container {
+    width: 100%;
+    background: #222;
+    border: 2px solid #444;
+    height: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s linear;
 }
 
 @keyframes spin {
@@ -564,50 +562,29 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-.progress-container {
-    width: 80%;
-    background: var(--card-bg);
-    border: 2px solid var(--border);
-    height: 16px;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 15px;
-}
-
-.progress-bar {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.1s ease;
-}
-
-/* 12. UPI Payment Popup Modal */
-.upi-pay-box {
-    text-align: center;
-}
+/* 12. UPI Box */
+.upi-pay-box { text-align: center; }
 
 .qr-frame {
     background: #fff;
-    padding: 10px;
+    padding: 8px;
     border: 2px solid var(--border);
     border-radius: 8px;
     display: inline-block;
     margin: 10px 0;
 }
 
-.qr-frame img {
-    width: 140px;
-    height: 140px;
-}
+.qr-frame img { width: 140px; height: 140px; }
 
 .upi-copy-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: space-between;
     background: rgba(0, 0, 0, 0.05);
     border: 2px solid var(--border);
-    padding: 8px;
+    padding: 8px 12px;
     border-radius: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-weight: 900;
 }
