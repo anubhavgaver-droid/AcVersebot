@@ -5,7 +5,7 @@ from pyrogram import Client
 from flask import Flask, send_from_directory, jsonify, request
 from threading import Thread
 import config
-from database.db import stories_col, orders_col, is_story_unlocked, get_user_data, users_col
+from db import stories_col, orders_col, is_story_unlocked, get_user_data, users_col
 
 web_app = Flask(__name__, static_folder="web")
 
