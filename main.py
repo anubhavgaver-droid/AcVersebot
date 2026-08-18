@@ -145,16 +145,17 @@ web_app.config["BOT_CLIENT"] = app
 
 def run_flask():
     port = int(os.environ.get("PORT", 8080))
-    web_app.run(host="0.0.0.0", port=port)
+    web_app.run(host="0.0.0.0", port=port, use_reloader=False)
 
-if __name__ == "__main__":
-    # Flask Web App को थ्रेड में चलाएँ
+async def main():
+    # Background Thread में Flask रन करें
     Thread(target=run_flask, daemon=True).start()
     
-    print("🚀 Web Server & Bot Starting...")
-    
-    # Pyrogram Bot को Main Thread में चलाएँ
-    app.start()
+    # Async Mode में Pyrogram Start करें
+    await app.start()
     print("🤖 ACVerse Bot Started Successfully!")
-    idle()
-    app.stop()
+    await idle()
+    await app.stop()
+
+if __name__ == "__main__":
+    asyncio.run(main())
