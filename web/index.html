@@ -9,6 +9,34 @@
 </head>
 <body class="light-theme">
 
+    <!-- 1. Normal App Open Splash Screen -->
+    <div id="app-splash-loader" class="splash-overlay hidden">
+        <div class="splash-card">
+            <div class="card-carousel">
+                <img src="https://via.placeholder.com/100x150" class="c-card card-left" id="splash-p1" alt="poster">
+                <img src="https://via.placeholder.com/120x180" class="c-card card-center" id="splash-p2" alt="poster">
+                <img src="https://via.placeholder.com/100x150" class="c-card card-right" id="splash-p3" alt="poster">
+            </div>
+            <h2 class="welcome-title">WELCOME TO ACVERSE PREMIUM</h2>
+            <p class="welcome-sub">Your automated store inside Telegram for premium audio and video story series — delivered instantly to your chat.</p>
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- 2. Direct Story Link % Loader -->
+    <div id="direct-loader" class="loader-overlay hidden">
+        <div class="loader-card">
+            <div class="icon-container">
+                <img id="loader-icon" src="https://via.placeholder.com/90" alt="Icon">
+            </div>
+            <h3 class="redirect-text">REDIRECTING...</h3>
+            <p class="sub-text">Opening story details directly</p>
+            <div class="progress-percentage"><span id="progress-val">0</span>%</div>
+            <p class="loading-label">LOADING STORY</p>
+        </div>
+    </div>
+
+    <!-- Header Top Bar -->
     <header class="top-bar">
         <h1 class="logo">ACVERSE</h1>
         <div class="header-badges">
@@ -17,70 +45,154 @@
         </div>
     </header>
 
-    <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" onkeyup="filterStories()" placeholder="Search romantic, thriller, action...">
-    </div>
-
-    <div class="categories-card">
-        <h3>CATEGORIES</h3>
-        <div class="tags-group">
-            <button class="tag active" onclick="filterCat('All', event)">All</button>
-            <button class="tag" onclick="filterCat('Pocket FM', event)">Pocket FM</button>
-            <button class="tag" onclick="filterCat('Pratilipi FM', event)">Pratilipi FM</button>
-        </div>
-    </div>
-
-    <div class="stories-grid" id="storiesGrid"></div>
-
-    <div class="user-card">
-        <div class="profile-header">
-            <div class="avatar">⚡</div>
-            <div>
-                <h3 id="userName">Guest User</h3>
-                <span class="badge-orange" id="userId">ID: 12345678 📱</span>
+    <!-- Main Views Container -->
+    <main class="main-content">
+        <!-- HOME VIEW -->
+        <section id="view-home" class="tab-view active-view">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" onkeyup="filterStories()" placeholder="Search romantic, thriller, action...">
             </div>
-        </div>
 
-        <div class="stats-row">
-            <div class="stat-box">
-                <h2 id="unlockedCount">0</h2>
-                <p>UNLOCKED STORIES</p>
+            <div class="categories-card">
+                <h3>CATEGORIES</h3>
+                <div class="tags-group">
+                    <button class="tag active" onclick="filterCat('All', event)">All</button>
+                    <button class="tag" onclick="filterCat('Pocket FM', event)">Pocket FM</button>
+                    <button class="tag" onclick="filterCat('Pratilipi FM', event)">Pratilipi FM</button>
+                </div>
             </div>
-            <div class="stat-box">
-                <h2 id="totalShows">0</h2>
-                <p>AVAILABLE SHOWS</p>
+
+            <div class="stories-grid" id="storiesGrid"></div>
+        </section>
+
+        <!-- EXPLORE VIEW -->
+        <section id="view-explore" class="tab-view hidden">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="exploreInput" onkeyup="filterStoriesExplore()" placeholder="Explore by genre or name...">
             </div>
-        </div>
-
-        <div class="info-card">
-            <h4>MY WISHLIST ❤️</h4>
-            <p id="wishlistStatus" style="font-size: 12px; margin-top: 5px; color: #777;">No saved stories yet!</p>
-        </div>
-
-        <div class="theme-section">
-            <p>APP THEME 🎨</p>
-            <div class="theme-buttons">
-                <button onclick="setTheme('light-theme')" class="theme-btn active-theme">☀️ Light</button>
-                <button onclick="setTheme('dark-theme')" class="theme-btn">🌙 Dark</button>
-                <button onclick="setTheme('cyber-theme')" class="theme-btn">🟢 Cyber</button>
+            <div class="categories-card">
+                <h3>EXPLORE CATEGORIES</h3>
+                <div class="tags-group">
+                    <button class="tag active" onclick="filterCat('All', event)">All</button>
+                    <button class="tag" onclick="filterCat('Pocket FM', event)">Pocket FM</button>
+                    <button class="tag" onclick="filterCat('Pratilipi FM', event)">Pratilipi FM</button>
+                </div>
             </div>
-        </div>
+            <div class="stories-grid" id="exploreGrid"></div>
+        </section>
 
-        <div class="quick-links" style="margin-top: 15px;">
-            <p style="font-size: 11px; margin-bottom: 5px;">QUICK LINKS</p>
-            <button class="quick-btn" onclick="filterPurchased()">
-                📁 My Purchased Stories <span style="float: right;">❯</span>
-            </button>
-        </div>
-    </div>
+        <!-- ORDERS VIEW -->
+        <section id="view-orders" class="tab-view hidden">
+            <div class="info-card" style="margin-top:10px;">
+                <h4>UNLOCKED LIBRARY 📚</h4>
+                <div id="unlockedList" style="margin-top: 10px;">
+                    <p style="font-size: 13px; color: #777;">No unlocked stories found!</p>
+                </div>
+            </div>
+        </section>
 
-    <div class="modal" id="storyModal">
-        <div class="modal-content">
+        <!-- PROFILE VIEW -->
+        <section id="view-profile" class="tab-view hidden">
+            <div class="user-card">
+                <div class="profile-header">
+                    <div class="avatar">⚡</div>
+                    <div>
+                        <h3 id="userName">Guest User</h3>
+                        <span class="badge-orange" id="userId">ID: 12345678 📱</span>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <h2 id="unlockedCount">0</h2>
+                        <p>UNLOCKED STORIES</p>
+                    </div>
+                    <div class="stat-box">
+                        <h2 id="totalShows">0</h2>
+                        <p>AVAILABLE SHOWS</p>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h4>MY WISHLIST ❤️</h4>
+                    <p id="wishlistStatus" style="font-size: 12px; margin-top: 5px; color: #777;">No saved stories yet!</p>
+                </div>
+
+                <div class="theme-section">
+                    <p>APP THEME 🎨</p>
+                    <div class="theme-buttons">
+                        <button onclick="setTheme('light-theme')" class="theme-btn active-theme">☀️ Light</button>
+                        <button onclick="setTheme('dark-theme')" class="theme-btn">🌙 Dark</button>
+                        <button onclick="setTheme('cyber-theme')" class="theme-btn">🟢 Cyber</button>
+                    </div>
+                </div>
+
+                <div class="quick-links" style="margin-top: 15px;">
+                    <p style="font-size: 11px; margin-bottom: 5px;">QUICK LINKS</p>
+                    <button class="quick-btn" onclick="switchTab('orders')">
+                        📁 My Purchased Stories <span style="float: right;">❯</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- STORY DETAIL VIEW MODAL (Blurred Hero Backdrop) -->
+    <div class="modal hidden" id="storyModal">
+        <div class="modal-overlay" onclick="closeModal()"></div>
+        <div class="modal-card">
             <button class="close-btn" onclick="closeModal()">✕</button>
-            <div class="modal-body" id="modalContainer"></div>
+            <div id="modalContainer"></div>
         </div>
     </div>
+
+    <!-- PAYMENT MODAL -->
+    <div class="modal hidden" id="paymentModal">
+        <div class="modal-overlay" onclick="closePaymentModal()"></div>
+        <div class="payment-card">
+            <button class="close-btn" onclick="closePaymentModal()">✕</button>
+            <h3>💳 UPI PAYMENT</h3>
+            <p style="font-size: 12px; color: #666; margin: 5px 0;">Scan QR or copy UPI ID to pay</p>
+            
+            <div class="qr-container">
+                <img id="paymentQr" src="" alt="Payment QR">
+            </div>
+
+            <div class="upi-box" onclick="copyUpi()">
+                <span id="upiIdText">paytm@upi</span>
+                <span class="copy-badge">COPY 📋</span>
+            </div>
+
+            <p class="pay-amount-text">Amount: ₹<span id="payAmountVal">0</span></p>
+
+            <div class="utr-group">
+                <input type="text" id="utrInput" placeholder="Enter 12 Digit UTR / Txn ID">
+                <button id="submitPayBtn" class="btn-primary" onclick="submitPayment()">SUBMIT PAYMENT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchTab('home', this)">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">HOME</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('explore', this)">
+            <span class="nav-icon">🧩</span>
+            <span class="nav-label">EXPLORE</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('orders', this)">
+            <span class="nav-icon">📦</span>
+            <span class="nav-label">ORDERS</span>
+        </button>
+        <button class="nav-btn" onclick="switchTab('profile', this)">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">PROFILE</span>
+        </button>
+    </nav>
 
     <script src="app.js"></script>
 </body>
