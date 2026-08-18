@@ -159,3 +159,10 @@ if __name__ == "__main__":
     
     # Render Web Service के लिए Flask रन करें
     web_app.run(host="0.0.0.0", port=port)
+
+def run_bot():
+    try:
+        app.start()
+        print("✅ Bot connected successfully!") # यह लॉग्स में दिखना चाहिए
+    except Exception as e:
+        print(f"❌ Bot failed to start: {e}") # अगर एरर है तो यहाँ दिखेगा
