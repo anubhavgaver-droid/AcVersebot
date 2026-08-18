@@ -1,4 +1,5 @@
-import os  # 'Import' को स्मॉल अक्षर 'import' किया गया
+import os  # 'Import' को स्मॉल अक्षरों में सही किया गया
+import asyncio
 from pyrogram import Client
 from flask import Flask, send_from_directory, jsonify, request
 from threading import Thread
@@ -143,17 +144,18 @@ app = Client(
 
 web_app.config["BOT_CLIENT"] = app
 
-def start_bot():
+def run_bot():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     app.start()
 
 if __name__ == "__main__":
-    # Render और लोकल दोनों जगह सपोर्ट करने के लिए पोर्ट बाइंडिंग
     port = int(os.environ.get("PORT", 8080))
     
-    # Pyrogram Bot को बैकग्राउंड थ्रेड में चलाएँ
-    Thread(target=start_bot, daemon=True).start()
+    # Pyrogram Bot को थ्रेड में सही Event Loop के साथ स्टार्ट करें
+    Thread(target=run_bot, daemon=True).start()
     
     print(f"🚀 ACVerse Server Running on Port {port}!")
     
-    # Render / Production Flask Server
+    # Render Web Service के लिए Flask रन करें
     web_app.run(host="0.0.0.0", port=port)
