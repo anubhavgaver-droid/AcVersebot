@@ -1,111 +1,146 @@
-const tg = window.Telegram?.WebApp;
+Const tg = window.Telegram?.WebApp;
 if (tg) {
-    tg.expand();
-    tg.ready();
+    Tg.expand();
+    Tg.ready();
 }
 
-let allStories = [];
+Let allStories = [];
 let userUnlockedStories = [];
 let userWishlist = [];
 let upiConfig = { upi_id: "6398324472@fam" };
 let currentStory = null;
 
-const userId = tg?.initDataUnsafe?.user?.id || 12345678;
+Const userId = tg?.initDataUnsafe?.user?.id || 12345678;
 const userName = tg?.initDataUnsafe?.user?.first_name 
     ? (tg.initDataUnsafe.user.first_name + (tg.initDataUnsafe.user.last_name ? " " + tg.initDataUnsafe.user.last_name : ""))
     : "Guest User";
 
-// Haptic Feedback
+// 🔔 Haptic Feedback Engine
 function haptic(type = "light") {
-    if (tg?.HapticFeedback) {
-        if (type === "success") tg.HapticFeedback.notificationOccurred("success");
-        else if (type === "error") tg.HapticFeedback.notificationOccurred("error");
-        else tg.HapticFeedback.impactOccurred(type);
+    If (tg?.HapticFeedback) {
+        If (type === "success") tg.HapticFeedback.notificationOccurred("success");
+        Else if (type === "error") tg.HapticFeedback.notificationOccurred("error");
+        Else tg.HapticFeedback.impactOccurred(type);
     }
 }
 
-// Global Tab Switching Logic
-window.switchTab = function(tabName, evt) {
-    if (evt) evt.stopPropagation();
-    haptic('selection');
+Document.addEventListener("DOMContentLoaded", () => {
+    // User Profile Information
+    Const userNameEl = document.getElementById("userName");
+    Const userIdEl = document.getElementById("userId");
+    If (userNameEl) userNameEl.innerText = userName;
+    If (userIdEl) userIdEl.innerText = `ID: ${userId}`;
 
-    // 1. Hide all views
-    document.querySelectorAll('.tab-view').forEach(v => {
-        v.classList.add('hidden');
-        v.classList.remove('active-view');
-    });
-
-    // 2. Clear nav active state
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
-    // 3. Show selected view
-    const targetView = document.getElementById(`view-${tabName}`);
-    if (targetView) {
-        targetView.classList.remove('hidden');
-        targetView.classList.add('active-view');
-    }
-
-    // 4. Highlight clicked button
-    if (evt && evt.currentTarget) {
-        evt.currentTarget.classList.add('active');
-    }
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-    const userNameEl = document.getElementById("userName");
-    const userIdEl = document.getElementById("userId");
-    if (userNameEl) userNameEl.innerText = userName;
-    if (userIdEl) userIdEl.innerText = `ID: ${userId}`;
-
-    fetch('/api/config')
+    // Config Fetching
+    Fetch('/api/config')
         .then(res => res.json())
         .then(cfg => { if (cfg && cfg.upi_id) upiConfig = cfg; })
-        .catch(err => console.log("Config bypass"));
+        .catch(err => console.log("Config fetch bypass"));
 
-    loadInitialData();
+    // Router and Splash handling
+    StartAppRouter();
 });
 
+// Router Logic for Animations
+function startAppRouter() {
+    Const params = new URLSearchParams(window.location.search);
+    Const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
+
+    If (storyId) {
+        RunDirectLinkAnimation(storyId);
+    } else {
+        RunNormalWelcomeSplash();
+    }
+}
+
+// 1. Welcome Splash Screen Animation
+function runNormalWelcomeSplash() {
+    Const splash = document.getElementById('app-splash-loader');
+    If (splash) splash.classList.remove('hidden');
+
+    LoadInitialData().then(() => {
+        SetTimeout(() => {
+            If (splash) splash.classList.add('hidden');
+        }, 2000);
+    });
+}
+
+// 2. Direct Story Link Animation (0-100% Loader)
+function runDirectLinkAnimation(storyId) {
+    Const loader = document.getElementById('direct-loader');
+    Const progressVal = document.getElementById('progress-val');
+    Const progressBar = document.getElementById('progressBar');
+    If (loader) loader.classList.remove('hidden');
+
+    Let progress = 0;
+    Const interval = setInterval(() => {
+        Progress += Math.floor(Math.random() * 8) + 5;
+        If (progress >= 100) {
+            Progress = 100;
+            ClearInterval(interval);
+
+            LoadInitialData().then(() => {
+                SetTimeout(() => {
+                    If (loader) loader.classList.add('hidden');
+                    OpenModal(storyId);
+                }, 300);
+            });
+        }
+        If (progressVal) progressVal.innerText = progress;
+        If (progressBar) progressBar.style.width = progress + '%';
+    }, 50);
+}
+
+// API Data Fetching
 function loadInitialData() {
-    return fetch(`/api/user_info?user_id=${userId}`)
+    Return fetch(`/api/user_info?user_id=${userId}`)
         .then(res => res.json())
         .then(usr => {
-            userUnlockedStories = usr.unlocked_stories || [];
-            userWishlist = usr.wishlist || [];
+            UserUnlockedStories = usr.unlocked_stories || [];
+            UserWishlist = usr.wishlist || [];
 
-            const unlockedEl = document.getElementById("unlockedCount");
-            const headerUnlockedEl = document.getElementById("headerUnlockedCount");
+            Const unlockedEl = document.getElementById("unlockedCount");
+            Const headerUnlockedEl = document.getElementById("headerUnlockedCount");
+            Const wishlistStatusEl = document.getElementById("wishlistStatus");
 
-            if (unlockedEl) unlockedEl.innerText = userUnlockedStories.length;
-            if (headerUnlockedEl) headerUnlockedEl.innerText = userUnlockedStories.length;
+            If (unlockedEl) unlockedEl.innerText = userUnlockedStories.length;
+            If (headerUnlockedEl) headerUnlockedEl.innerText = userUnlockedStories.length;
 
-            return fetch('/api/stories');
+            If (wishlistStatusEl) {
+                WishlistStatusEl.innerText = userWishlist.length > 0 
+                    ? `${userWishlist.length} Stories Saved` 
+                    : "No saved stories yet!";
+            }
+
+            Return fetch('/api/stories');
         })
         .then(res => res.json())
         .then(data => {
-            allStories = data || [];
-            const totalShowsEl = document.getElementById("totalShows");
-            if (totalShowsEl) totalShowsEl.innerText = allStories.length;
+            AllStories = data || [];
+            Const totalShowsEl = document.getElementById("totalShows");
+            If (totalShowsEl) totalShowsEl.innerText = allStories.length;
 
-            renderStories(allStories, 'storiesGrid');
-            renderStories(allStories, 'exploreGrid');
-            renderUnlockedLibrary();
+            RenderStories(allStories, 'storiesGrid');
+            RenderStories(allStories, 'exploreGrid');
+            RenderUnlockedLibrary();
         })
-        .catch(err => console.error("Data Load Error:", err));
+        .catch(err => console.error("Data Loading Failed:", err));
 }
 
+// Render Stories to Grid
 function renderStories(stories, targetGridId = 'storiesGrid') {
-    const grid = document.getElementById(targetGridId);
-    if (!grid) return;
+    Const grid = document.getElementById(targetGridId);
+    If (!grid) return;
 
-    if (stories.length === 0) {
-        grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #777; font-size: 12px; padding: 20px;">No stories found</p>`;
-        return;
+    If (stories.length === 0) {
+        Grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #777; font-size: 12px; padding: 20px;">No stories found</p>`;
+        Return;
     }
 
-    grid.innerHTML = stories.map(s => {
-        const isWished = userWishlist.includes(s.story_id);
-        const badgeText = s.badge || s.platform || "POCKET FM";
-        return `
+    Grid.innerHTML = stories.map(s => {
+        Const isWished = userWishlist.includes(s.story_id);
+        Const badgeText = s.badge || s.platform || "POCKET FM";
+        Return `
             <div class="story-card">
                 <div class="wishlist-heart ${isWished ? 'active' : ''}" onclick="toggleWishlist('${s.story_id}', event)">
                     ${isWished ? '❤️' : '🤍'}
@@ -122,17 +157,18 @@ function renderStories(stories, targetGridId = 'storiesGrid') {
     }).join('');
 }
 
+// Unlocked Orders Tab
 function renderUnlockedLibrary() {
-    const unlockedList = document.getElementById("unlockedList");
-    if (!unlockedList) return;
+    Const unlockedList = document.getElementById("unlockedList");
+    If (!unlockedList) return;
 
-    const purchased = allStories.filter(s => userUnlockedStories.includes(s.story_id));
-    if (purchased.length === 0) {
-        unlockedList.innerHTML = `<p style="font-size: 12px; color: #777;">No unlocked stories found!</p>`;
-        return;
+    Const purchased = allStories.filter(s => userUnlockedStories.includes(s.story_id));
+    If (purchased.length === 0) {
+        UnlockedList.innerHTML = `<p style="font-size: 12px; color: #777;">No unlocked stories found!</p>`;
+        Return;
     }
 
-    unlockedList.innerHTML = purchased.map(s => `
+    UnlockedList.innerHTML = purchased.map(s => `
         <div style="display: flex; align-items: center; justify-content: space-between; border: 2px solid var(--border); padding: 8px; border-radius: 8px; margin-bottom: 8px; background: var(--card-bg);">
             <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="${s.banner}" style="width: 40px; height: 50px; object-fit: cover; border-radius: 5px;">
@@ -146,18 +182,19 @@ function renderUnlockedLibrary() {
     `).join('');
 }
 
-window.openModal = function(storyId) {
-    haptic('medium');
+// Story Details Modal View
+function openModal(storyId) {
+    Haptic('medium');
 
-    fetch(`/api/story_details?user_id=${userId}&story_id=${storyId}`)
+    Fetch(`/api/story_details?user_id=${userId}&story_id=${storyId}`)
         .then(res => res.json())
         .then(story => {
-            currentStory = story;
-            const container = document.getElementById("modalContainer");
-            const badgeText = story.badge || story.platform || "POCKET FM";
+            CurrentStory = story;
+            Const container = document.getElementById("modalContainer");
+            Const badgeText = story.badge || story.platform || "POCKET FM";
 
-            if (story.unlocked) {
-                container.innerHTML = `
+            If (story.unlocked) {
+                Container.innerHTML = `
                     <div class="hero-backdrop">
                         <img class="bg-blur" src="${story.banner}">
                         <img class="poster-corner" src="${story.banner}">
@@ -176,7 +213,7 @@ window.openModal = function(storyId) {
                     </div>
                 `;
             } else {
-                container.innerHTML = `
+                Container.innerHTML = `
                     <div class="hero-backdrop">
                         <img class="bg-blur" src="${story.banner}">
                         <img class="poster-corner" src="${story.banner}">
@@ -184,6 +221,7 @@ window.openModal = function(storyId) {
                     <div class="story-meta">
                         <span class="platform-badge">${badgeText}</span>
                         <h2 style="margin: 6px 0;">${story.title}</h2>
+                        <div class="genre-tag">${story.genre || 'Audio Series'}</div>
                         <p class="desc-box">${story.description || 'No description available.'}</p>
                     </div>
                     <div class="buy-footer">
@@ -196,129 +234,203 @@ window.openModal = function(storyId) {
                 `;
             }
 
-            const modal = document.getElementById("storyModal");
-            if (modal) modal.classList.remove("hidden");
-        });
-};
-
-window.closeModal = function() {
-    haptic('light');
-    document.getElementById("storyModal")?.classList.add("hidden");
-};
-
-window.openPaymentModal = function() {
-    haptic('medium');
-    closeModal();
-
-    const payAmountVal = document.getElementById('payAmountVal');
-    const upiIdText = document.getElementById('upiIdText');
-    const paymentQr = document.getElementById('paymentQr');
-    const payModal = document.getElementById('paymentModal');
-
-    if (payAmountVal) payAmountVal.innerText = currentStory.price;
-    if (upiIdText) upiIdText.innerText = upiConfig.upi_id;
-    if (paymentQr) {
-        paymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiConfig.upi_id}%26pn=ACVerse%26am=${currentStory.price}`;
-    }
-
-    if (payModal) payModal.classList.remove('hidden');
-};
-
-window.closePaymentModal = function() {
-    haptic('light');
-    document.getElementById('paymentModal')?.classList.add('hidden');
-};
-
-window.copyUpi = function() {
-    navigator.clipboard.writeText(upiConfig.upi_id);
-    haptic('success');
-    if (tg) tg.showAlert("✅ UPI ID Copied!");
-};
-
-window.submitTransaction = function() {
-    const utrInput = document.getElementById("utrInput");
-    const utr = utrInput ? utrInput.value.trim() : "";
-
-    if (!utr || utr.length < 6) {
-        haptic('error');
-        if (tg) tg.showAlert("⚠️ Please enter valid UTR!");
-        return;
-    }
-
-    haptic('medium');
-    fetch('/api/submit_payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            user_id: userId,
-            user_name: userName,
-            story_id: currentStory.story_id,
-            amount: currentStory.price,
-            utr: utr
+            Const modal = document.getElementById("storyModal");
+            If (modal) modal.classList.remove("hidden");
         })
-    }).then(() => {
-        haptic('success');
-        if (tg) tg.showAlert("✅ Payment Submitted!");
-        closePaymentModal();
-    });
-};
+        .catch(err => {
+            If (tg) tg.showAlert("Error loading story details!");
+        });
+}
 
-window.redirectToBot = function(botLink) {
-    haptic('medium');
-    if (tg && tg.openTelegramLink) {
-        tg.openTelegramLink(botLink);
-        tg.close();
-    } else {
-        window.open(botLink, '_blank');
+Function closeModal() {
+    Haptic('light');
+    Const modal = document.getElementById("storyModal");
+    If (modal) modal.classList.add("hidden");
+}
+
+// Payment Modal Popups
+function openPaymentModal() {
+    Haptic('medium');
+    CloseModal();
+
+    Const payAmountVal = document.getElementById('payAmountVal');
+    Const upiIdText = document.getElementById('upiIdText');
+    Const paymentQr = document.getElementById('paymentQr');
+    Const payModal = document.getElementById('paymentModal');
+
+    If (payAmountVal) payAmountVal.innerText = currentStory.price;
+    If (upiIdText) upiIdText.innerText = upiConfig.upi_id;
+    If (paymentQr) {
+        PaymentQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=${upiConfig.upi_id}%26pn=ACVerse%26am=${currentStory.price}`;
     }
-};
 
-window.toggleWishlist = function(storyId, evt) {
-    if (evt) evt.stopPropagation();
-    haptic('selection');
+    If (payModal) payModal.classList.remove('hidden');
+}
 
-    fetch('/api/toggle_wishlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, story_id: storyId })
+Function closePaymentModal() {
+    Haptic('light');
+    Const payModal = document.getElementById('paymentModal');
+    If (payModal) payModal.classList.add('hidden');
+}
+
+Function copyUpi() {
+    Navigator.clipboard.writeText(upiConfig.upi_id);
+    Haptic('success');
+    If (tg) tg.showAlert("✅ UPI ID Copied to clipboard!");
+}
+
+// UTR Submission
+function submitTransaction() {
+    Const utrInput = document.getElementById("utrInput");
+    Const utr = utrInput ? UtrInput.value.trim() : "";
+    
+    If (!utr || utr.length < 6) {
+        Haptic('error');
+        If (tg) tg.showAlert("⚠️ Please enter a valid UTR / Ref No.!");
+        Return;
+    }
+
+    Haptic('medium');
+    Const submitBtn = document.getElementById("submitPayBtn");
+    If (submitBtn) {
+        SubmitBtn.disabled = true;
+        SubmitBtn.innerText = "SUBMITTING...";
+    }
+
+    Fetch('/api/submit_payment', {
+        Method: 'POST',
+        Headers: { 'Content-Type': 'application/json' },
+        Body: JSON.stringify({
+            User_id: userId,
+            User_name: userName,
+            Story_id: currentStory.story_id,
+            Amount: currentStory.price,
+            Utr: utr
+        })
     })
     .then(res => res.json())
     .then(data => {
-        if (data.status === 'added') {
-            userWishlist.push(storyId);
-        } else {
-            userWishlist = userWishlist.filter(id => id !== storyId);
+        If (submitBtn) {
+            SubmitBtn.disabled = false;
+            SubmitBtn.innerText = "SUBMIT PAYMENT 🚀";
         }
-        renderStories(allStories, 'storiesGrid');
-        renderStories(allStories, 'exploreGrid');
+
+        If (data.success) {
+            Haptic('success');
+            If (tg) tg.showAlert("✅ Payment Sent for Approval!\nYour payment details have been sent to our admin for verification.");
+            ClosePaymentModal();
+        } else {
+            Haptic('error');
+            If (tg) tg.showAlert("❌ Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        If (submitBtn) {
+            SubmitBtn.disabled = false;
+            SubmitBtn.innerText = "SUBMIT PAYMENT 🚀";
+        }
+        Haptic('error');
+        If (tg) tg.showAlert("❌ Payment details sent to admin!");
+        ClosePaymentModal();
     });
-};
+}
 
-window.filterCat = function(cat, evt) {
-    haptic('light');
-    document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
-    if (evt && evt.target) evt.target.classList.add('active');
-
-    if (cat === 'All') {
-        renderStories(allStories, 'storiesGrid');
+Function redirectToBot(botLink) {
+    Haptic('medium');
+    If (tg && tg.openTelegramLink) {
+        Tg.openTelegramLink(botLink);
+        Tg.close();
     } else {
-        renderStories(allStories.filter(s => s.category === cat || s.badge === cat || s.platform === cat), 'storiesGrid');
+        Window.open(botLink, '_blank');
     }
-};
+}
 
-window.filterStories = function() {
-    const q = document.getElementById("searchInput")?.value.toLowerCase() || "";
-    renderStories(allStories.filter(s => s.title.toLowerCase().includes(q)), 'storiesGrid');
-};
+Function toggleWishlist(storyId, evt) {
+    If (evt) evt.stopPropagation();
+    Haptic('selection');
 
-window.filterStoriesExplore = function() {
-    const q = document.getElementById("exploreInput")?.value.toLowerCase() || "";
-    renderStories(allStories.filter(s => s.title.toLowerCase().includes(q)), 'exploreGrid');
-};
+    Fetch('/api/toggle_wishlist', {
+        Method: 'POST',
+        Headers: { 'Content-Type': 'application/json' },
+        Body: JSON.stringify({ user_id: userId, story_id: storyId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        If (data.status === 'added') {
+            UserWishlist.push(storyId);
+        } else {
+            UserWishlist = userWishlist.filter(id => id !== storyId);
+        }
+        
+        Const wishlistStatusEl = document.getElementById("wishlistStatus");
+        If (wishlistStatusEl) {
+            WishlistStatusEl.innerText = userWishlist.length > 0 
+                ? `${userWishlist.length} Stories Saved` 
+                : "No saved stories yet!";
+        }
 
-window.setTheme = function(theme, evt) {
-    haptic('light');
-    document.body.className = theme;
-    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
-    if (evt && evt.target) evt.target.classList.add('active-theme');
-};
+        RenderStories(allStories, 'storiesGrid');
+        RenderStories(allStories, 'exploreGrid');
+    });
+}
+
+// Navigation Tabs (Updated with Auto-Dismiss for Modals)
+Function switchTab(tabName, btn) {
+    Haptic('selection');
+
+    // 1. Koi bhi modal khula ho toh automatic close karein
+    CloseModal();
+    ClosePaymentModal();
+
+    // 2. Hide all tab views
+    Document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+    Document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    // 3. Show target view
+    Const activeView = document.getElementById(`view-${tabName}`);
+    If (activeView) activeView.classList.remove('hidden');
+
+    // 4. Highlight active button
+    If (btn) {
+        Btn.classList.add('active');
+    } else {
+        Const matchingBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
+        If (matchingBtn) matchingBtn.classList.add('active');
+    }
+}
+
+// Filters
+Function filterCat(cat, evt) {
+    Haptic('light');
+    Document.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
+    If (evt && evt.target) evt.target.classList.add('active');
+
+    If (cat === 'All') {
+        RenderStories(allStories, 'storiesGrid');
+    } else {
+        RenderStories(allStories.filter(s => s.category === cat || s.badge === cat || s.platform === cat), 'storiesGrid');
+    }
+}
+
+Function filterStories() {
+    Const searchInput = document.getElementById("searchInput");
+    Const q = searchInput ? SearchInput.value.toLowerCase() : "";
+    Const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
+    RenderStories(filtered, 'storiesGrid');
+}
+
+Function filterStoriesExplore() {
+    Const exploreInput = document.getElementById("exploreInput");
+    Const q = exploreInput ? ExploreInput.value.toLowerCase() : "";
+    Const filtered = allStories.filter(s => s.title.toLowerCase().includes(q) || (s.description && s.description.toLowerCase().includes(q)));
+    RenderStories(filtered, 'exploreGrid');
+}
+
+Function setTheme(theme, evt) {
+    Haptic('light');
+    Document.body.className = theme;
+    Document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
+    
+    Const targetBtn = evt ? Evt.target : (typeof event !== 'undefined' ? Event.target : null);
+    If (targetBtn) targetBtn.classList.add('active-theme');
+}
