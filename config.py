@@ -15,3 +15,5 @@ MONGO_URI = os.environ.get("MONGO_URI", "mongodb+srv://your_mongo_url_here")
 MINI_APP_URL = os.environ.get("MINI_APP_URL", "https://acverse.onrender.com")
 UPI_ID = os.environ.get("UPI_ID", "6398324472@fam")
 UPI_NAME = "ACVerse Store"
+
+PORT = int(os.environ.get("PORT", 8080))  # लोकल टेस्ट के लिए 8080
