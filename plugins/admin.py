@@ -2,7 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.types import CallbackQuery
 from bson.objectid import ObjectId
 import config
-from database.db import stories_col, orders_col, users_col
+from db import stories_col, orders_col, users_col
 import uuid
 
 # Usage: /addstory Category | Title | Price | Badge | BannerURL | Description | FileStoreBotLink
