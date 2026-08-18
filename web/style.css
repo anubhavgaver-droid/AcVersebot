@@ -1,0 +1,434 @@
+/* ==========================================
+   ACVERSE MINI APP - NEUBRUTALISM STYLESHEET
+   ========================================== */
+
+/* 1. CSS Variables & Theme Definitions */
+:root {
+    --bg-color: #f4f4f0;
+    --card-bg: #ffffff;
+    --text-color: #000000;
+    --border: #000000;
+    --accent: #ffcc00;
+    --badge-blue: #2563eb;
+    --badge-orange: #d97706;
+    --btn-hover: #e6b800;
+    --shadow: 4px 4px 0px #000000;
+}
+
+/* Dark Theme Variables */
+body.dark-theme {
+    --bg-color: #121214;
+    --card-bg: #1e1e24;
+    --text-color: #ffffff;
+    --border: #ffffff;
+    --accent: #ff4757;
+    --badge-blue: #3b82f6;
+    --badge-orange: #f59e0b;
+    --shadow: 4px 4px 0px #ffffff;
+}
+
+/* Cyber Theme Variables */
+body.cyber-theme {
+    --bg-color: #0d1117;
+    --card-bg: #161b22;
+    --text-color: #00ff7f;
+    --border: #00ff7f;
+    --accent: #00e5ff;
+    --badge-blue: #0055ff;
+    --badge-orange: #ff9900;
+    --shadow: 4px 4px 0px #00e5ff;
+}
+
+/* 2. Global Resets & Layout */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 15px;
+    padding-bottom: 40px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 3. Top Header Bar */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    text-transform: uppercase;
+}
+
+.header-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.pill-btn {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    box-shadow: 2px 2px 0px var(--border);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.yellow-btn {
+    background: var(--accent);
+    color: #000;
+}
+
+/* 4. Search Bar */
+.search-box {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px 12px 40px;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 3px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: var(--shadow);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+/* 5. Categories Card */
+.categories-card {
+    background: var(--card-bg);
+    border: 3px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.categories-card h3 {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    color: #777;
+}
+
+.tags-group {
+    display: flex;
+    gap: 8px;
+}
+
+.tag {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.tag.active {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 2px 2px 0px var(--border);
+}
+
+/* 6. Stories Grid */
+.stories-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.story-card {
+    position: relative;
+    background: var(--card-bg);
+    border: 3px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.wishlist-heart {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid #000;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.story-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-bottom: 3px solid var(--border);
+}
+
+.card-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.badge-blue {
+    background: var(--badge-blue);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 3px 6px;
+    border-radius: 4px;
+    align-self: flex-start;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.card-title {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.price-tag {
+    font-size: 16px;
+    font-weight: 900;
+    margin-bottom: 10px;
+}
+
+.view-btn, .buy-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: 2px solid var(--border);
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: 2px 2px 0px var(--border);
+    text-transform: uppercase;
+    margin-top: auto;
+}
+
+.view-btn:active, .buy-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+}
+
+/* 7. User Profile Section (Exact Video Design) */
+.user-card {
+    background: var(--card-bg);
+    border: 3px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: var(--shadow);
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    background: #e2e8f0;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.badge-orange {
+    background: var(--badge-orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat-box {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
+
+.stat-box h2 {
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.stat-box p {
+    font-size: 9px;
+    font-weight: 800;
+    color: #777;
+}
+
+.info-card {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+/* 8. Theme Switcher */
+.theme-section {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.theme-section p {
+    font-size: 11px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.theme-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.theme-btn {
+    flex: 1;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--border);
+    padding: 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.quick-btn {
+    width: 100%;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 2px solid var(--border);
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* 9. Modal Overlay */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 100;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-top: 3px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-right: 3px solid var(--border);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    width: 100%;
+    max-height: 85vh;
+    padding: 20px;
+    position: relative;
+    overflow-y: auto;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #000;
+    color: #fff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.desc-box {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    margin-top: 10px;
+    line-height: 1.4;
+}
