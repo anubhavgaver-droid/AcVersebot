@@ -204,7 +204,7 @@ body {
     cursor: pointer;
 }
 
-/* MODALS & OVERLAYS */
+/* 🎯 FIXED BACKDROP BLUR & MODAL OVERLAY */
 .modal {
     position: fixed;
     top: 0;
@@ -212,37 +212,153 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(10px); /* WebKit/Safari/iOS Support */
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: flex-end;
-    z-index: 1000;
+    justify-content: center;
+    z-index: 2000;
 }
 
 .modal-content {
     background: var(--card-bg);
     width: 100%;
+    max-width: 500px;
     max-height: 85vh;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
-    padding: 20px;
+    padding: 16px;
     position: relative;
     overflow-y: auto;
-    border-top: 3px solid var(--border);
+    border-top: 2px solid var(--border);
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
 }
 
 .close-btn {
     position: absolute;
     top: 12px;
     right: 16px;
-    background: rgba(0,0,0,0.1);
+    background: rgba(0,0,0,0.5);
     border: none;
-    color: var(--text);
-    font-size: 18px;
+    color: #fff;
+    font-size: 16px;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     cursor: pointer;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 🎯 FIXED STORY MODAL HERO BANNER & DISPLAY */
+.hero-backdrop {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: #000;
+}
+
+.hero-backdrop .bg-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(12px);
+    opacity: 0.5;
+    transform: scale(1.1);
+}
+
+.hero-backdrop .poster-corner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 140px;
+    width: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    z-index: 2;
+}
+
+.story-meta {
+    padding: 4px 0;
+}
+
+.genre-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(255, 107, 0, 0.12);
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin: 6px 0;
+}
+
+.desc-box {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text);
+    opacity: 0.85;
+    max-height: 110px;
+    overflow-y: auto;
+    background: rgba(0,0,0,0.03);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin: 10px 0;
+}
+
+.buy-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+}
+
+/* 🎯 UPI PAYMENT MODAL STYLES */
+.upi-pay-box {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.qr-frame {
+    background: #fff;
+    padding: 10px;
+    display: inline-block;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    margin: 12px 0;
+}
+
+.qr-frame img {
+    width: 140px;
+    height: 140px;
+    display: block;
+}
+
+.upi-copy-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.05);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
 }
 
 /* BOTTOM NAVIGATION */
@@ -257,8 +373,7 @@ body {
     justify-content: space-around;
     padding: 8px 0;
     padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-    z-index: 1001; /* Modal se high rank hai taaki block na ho */
-    pointer-events: auto;
+    z-index: 1000;
 }
 
 .nav-btn {
@@ -341,7 +456,7 @@ body {
     width: 100%;
     height: 100%;
     background: var(--bg);
-    z-index: 2000;
+    z-index: 3000;
     display: flex;
     align-items: center;
     justify-content: center;
