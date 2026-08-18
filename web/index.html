@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACVerse Store</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body class="light-theme">
+
+    <header class="top-bar">
+        <h1 class="logo">ACVERSE</h1>
+        <div class="header-badges">
+            <button class="pill-btn"><span class="icon">🎧</span> AUDIO</button>
+            <button class="pill-btn yellow-btn"><span class="icon" id="headerUnlockedCount">0</span> UNLOCKED</button>
+        </div>
+    </header>
+
+    <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" onkeyup="filterStories()" placeholder="Search romantic, thriller, action...">
+    </div>
+
+    <div class="categories-card">
+        <h3>CATEGORIES</h3>
+        <div class="tags-group">
+            <button class="tag active" onclick="filterCat('All', event)">All</button>
+            <button class="tag" onclick="filterCat('Pocket FM', event)">Pocket FM</button>
+            <button class="tag" onclick="filterCat('Pratilipi FM', event)">Pratilipi FM</button>
+        </div>
+    </div>
+
+    <div class="stories-grid" id="storiesGrid"></div>
+
+    <div class="user-card">
+        <div class="profile-header">
+            <div class="avatar">⚡</div>
+            <div>
+                <h3 id="userName">Guest User</h3>
+                <span class="badge-orange" id="userId">ID: 12345678 📱</span>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <h2 id="unlockedCount">0</h2>
+                <p>UNLOCKED STORIES</p>
+            </div>
+            <div class="stat-box">
+                <h2 id="totalShows">0</h2>
+                <p>AVAILABLE SHOWS</p>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h4>MY WISHLIST ❤️</h4>
+            <p id="wishlistStatus" style="font-size: 12px; margin-top: 5px; color: #777;">No saved stories yet!</p>
+        </div>
+
+        <div class="theme-section">
+            <p>APP THEME 🎨</p>
+            <div class="theme-buttons">
+                <button onclick="setTheme('light-theme')" class="theme-btn active-theme">☀️ Light</button>
+                <button onclick="setTheme('dark-theme')" class="theme-btn">🌙 Dark</button>
+                <button onclick="setTheme('cyber-theme')" class="theme-btn">🟢 Cyber</button>
+            </div>
+        </div>
+
+        <div class="quick-links" style="margin-top: 15px;">
+            <p style="font-size: 11px; margin-bottom: 5px;">QUICK LINKS</p>
+            <button class="quick-btn" onclick="filterPurchased()">
+                📁 My Purchased Stories <span style="float: right;">❯</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="modal" id="storyModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✕</button>
+            <div class="modal-body" id="modalContainer"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
