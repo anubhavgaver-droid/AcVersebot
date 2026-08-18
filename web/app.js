@@ -15,7 +15,7 @@ const userName = tg?.initDataUnsafe?.user?.first_name
     ? (tg.initDataUnsafe.user.first_name + (tg.initDataUnsafe.user.last_name ? " " + tg.initDataUnsafe.user.last_name : ""))
     : "Guest User";
 
-// 🔔 Haptic Feedback
+// Haptic Feedback
 function haptic(type = "light") {
     if (tg?.HapticFeedback) {
         if (type === "success") tg.HapticFeedback.notificationOccurred("success");
@@ -24,35 +24,30 @@ function haptic(type = "light") {
     }
 }
 
-// 📌 FIXED TAB SWITCHING FUNCTION (ग्लोबली डिफाइन किया गया है)
-window.switchTab = function(tabName, el) {
+// Global Tab Switching Logic
+window.switchTab = function(tabName, evt) {
+    if (evt) evt.stopPropagation();
     haptic('selection');
 
-    // 1. सभी टैब व्यूज छुपाएं
-    const views = document.querySelectorAll('.tab-view');
-    views.forEach(v => {
+    // 1. Hide all views
+    document.querySelectorAll('.tab-view').forEach(v => {
         v.classList.add('hidden');
         v.classList.remove('active-view');
     });
 
-    // 2. बॉटम नेविगेशन बटन्स का एक्टिव स्टेटस हटाएं
-    const navBtns = document.querySelectorAll('.nav-btn');
-    navBtns.forEach(b => b.classList.remove('active'));
+    // 2. Clear nav active state
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-    // 3. सिलेक्ट किए गए टैब को दिखाएं
+    // 3. Show selected view
     const targetView = document.getElementById(`view-${tabName}`);
     if (targetView) {
         targetView.classList.remove('hidden');
         targetView.classList.add('active-view');
     }
 
-    // 4. सही बटन को एक्टिव मार्क करें
-    if (el) {
-        const btn = el.closest('.nav-btn') || el;
-        btn.classList.add('active');
-    } else {
-        const activeBtn = document.querySelector(`.nav-btn[onclick*="'${tabName}'"]`);
-        if (activeBtn) activeBtn.classList.add('active');
+    // 4. Highlight clicked button
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.classList.add('active');
     }
 };
 
@@ -67,55 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(cfg => { if (cfg && cfg.upi_id) upiConfig = cfg; })
         .catch(err => console.log("Config bypass"));
 
-    startAppRouter();
+    loadInitialData();
 });
-
-function startAppRouter() {
-    const params = new URLSearchParams(window.location.search);
-    const storyId = params.get('story_id') || params.get('startapp') || tg?.initDataUnsafe?.start_param;
-
-    if (storyId) {
-        runDirectLinkAnimation(storyId);
-    } else {
-        runNormalWelcomeSplash();
-    }
-}
-
-function runNormalWelcomeSplash() {
-    const splash = document.getElementById('app-splash-loader');
-    if (splash) splash.classList.remove('hidden');
-
-    loadInitialData().then(() => {
-        setTimeout(() => {
-            if (splash) splash.classList.add('hidden');
-        }, 1500);
-    });
-}
-
-function runDirectLinkAnimation(storyId) {
-    const loader = document.getElementById('direct-loader');
-    const progressVal = document.getElementById('progress-val');
-    const progressBar = document.getElementById('progressBar');
-    if (loader) loader.classList.remove('hidden');
-
-    let progress = 0;
-    const interval = setInterval(() => {
-        progress += Math.floor(Math.random() * 10) + 5;
-        if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-
-            loadInitialData().then(() => {
-                setTimeout(() => {
-                    if (loader) loader.classList.add('hidden');
-                    openModal(storyId);
-                }, 300);
-            });
-        }
-        if (progressVal) progressVal.innerText = progress;
-        if (progressBar) progressBar.style.width = progress + '%';
-    }, 40);
-}
 
 function loadInitialData() {
     return fetch(`/api/user_info?user_id=${userId}`)
@@ -126,16 +74,9 @@ function loadInitialData() {
 
             const unlockedEl = document.getElementById("unlockedCount");
             const headerUnlockedEl = document.getElementById("headerUnlockedCount");
-            const wishlistStatusEl = document.getElementById("wishlistStatus");
 
             if (unlockedEl) unlockedEl.innerText = userUnlockedStories.length;
             if (headerUnlockedEl) headerUnlockedEl.innerText = userUnlockedStories.length;
-
-            if (wishlistStatusEl) {
-                wishlistStatusEl.innerText = userWishlist.length > 0 
-                    ? `${userWishlist.length} Stories Saved` 
-                    : "No saved stories yet!";
-            }
 
             return fetch('/api/stories');
         })
@@ -243,7 +184,6 @@ window.openModal = function(storyId) {
                     <div class="story-meta">
                         <span class="platform-badge">${badgeText}</span>
                         <h2 style="margin: 6px 0;">${story.title}</h2>
-                        <div class="genre-tag">${story.genre || 'Audio Series'}</div>
                         <p class="desc-box">${story.description || 'No description available.'}</p>
                     </div>
                     <div class="buy-footer">
@@ -258,16 +198,12 @@ window.openModal = function(storyId) {
 
             const modal = document.getElementById("storyModal");
             if (modal) modal.classList.remove("hidden");
-        })
-        .catch(err => {
-            if (tg) tg.showAlert("Error loading story details!");
         });
 };
 
 window.closeModal = function() {
     haptic('light');
-    const modal = document.getElementById("storyModal");
-    if (modal) modal.classList.add("hidden");
+    document.getElementById("storyModal")?.classList.add("hidden");
 };
 
 window.openPaymentModal = function() {
@@ -290,8 +226,7 @@ window.openPaymentModal = function() {
 
 window.closePaymentModal = function() {
     haptic('light');
-    const payModal = document.getElementById('paymentModal');
-    if (payModal) payModal.classList.add('hidden');
+    document.getElementById('paymentModal')?.classList.add('hidden');
 };
 
 window.copyUpi = function() {
@@ -321,16 +256,9 @@ window.submitTransaction = function() {
             amount: currentStory.price,
             utr: utr
         })
-    })
-    .then(res => res.json())
-    .then(data => {
+    }).then(() => {
         haptic('success');
-        if (tg) tg.showAlert("✅ Payment Submitted for Approval!");
-        closePaymentModal();
-    })
-    .catch(() => {
-        haptic('success');
-        if (tg) tg.showAlert("✅ Payment details submitted!");
+        if (tg) tg.showAlert("✅ Payment Submitted!");
         closePaymentModal();
     });
 };
@@ -388,9 +316,9 @@ window.filterStoriesExplore = function() {
     renderStories(allStories.filter(s => s.title.toLowerCase().includes(q)), 'exploreGrid');
 };
 
-window.setTheme = function(theme) {
+window.setTheme = function(theme, evt) {
     haptic('light');
     document.body.className = theme;
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active-theme'));
-    if (event && event.target) event.target.classList.add('active-theme');
+    if (evt && evt.target) evt.target.classList.add('active-theme');
 };
